@@ -4,22 +4,22 @@ namespace Sortcery.Model;
 
 public class FolderInfo
 {
-    public FolderInfo(string path)
+    public FolderInfo(string fullName)
     {
-        Path = path;
+        FullName = fullName;
     }
     
-    public string Path { get; }
+    public string FullName { get; }
     
     public IReadOnlyDictionary<HardLinkId, FileInfo> Traverse()
     {
         var result = new Dictionary<HardLinkId, FileInfo>();
-        var path = new UnixDirectoryInfo(Path);
-        Traverse(result, path, path);
+        var path = new UnixDirectoryInfo(FullName);
+        Traverse(result, path);
         return result;
     }
     
-    private void Traverse(Dictionary<HardLinkId, FileInfo> result, UnixDirectoryInfo initialDir, UnixDirectoryInfo currentDir)
+    private void Traverse(Dictionary<HardLinkId, FileInfo> result, UnixDirectoryInfo currentDir)
     {
         // Traverse all over GetSystemEntries() to get all files and directories
         foreach (var entry in currentDir.GetFileSystemEntries())
@@ -28,11 +28,11 @@ public class FolderInfo
             {
                 // If it's a directory, traverse it
                 case UnixDirectoryInfo subDir:
-                    Traverse(result, initialDir, subDir);
+                    Traverse(result, subDir);
                     break;
                 case UnixFileInfo file:
                     // If it's a file, add it to the result
-                    var fileInfo = FileInfo.FromUnixFileInfo(initialDir, file);
+                    var fileInfo = FileInfo.FromUnixFileInfo(this, file);
                     if (!result.ContainsKey(fileInfo.HardLinkId))
                     {
                         result.Add(fileInfo.HardLinkId, fileInfo);

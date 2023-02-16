@@ -2,12 +2,11 @@
 
 namespace Sortcery.Model;
 
-public record struct FileInfo(string Dir, string RelativePath, HardLinkId HardLinkId)
+public record struct FileInfo(FolderInfo Dir, string RelativePath, HardLinkId HardLinkId)
 {
-    public static FileInfo FromUnixFileInfo(UnixDirectoryInfo startDir, UnixFileInfo unixFileInfo)
+    public static FileInfo FromUnixFileInfo(FolderInfo dir, UnixFileInfo unixFileInfo)
     {
-        var dir = startDir.FullName;
-        var relativePath = unixFileInfo.FullName[(dir.Length + 1)..];
+        var relativePath = unixFileInfo.FullName[(dir.FullName.Length + 1)..];
         var hardLinkId = HardLinkId.FromUnixFileInfo(unixFileInfo);
         return new FileInfo(dir, relativePath, hardLinkId);
     }
