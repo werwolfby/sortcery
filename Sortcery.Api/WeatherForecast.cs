@@ -1,4 +1,4 @@
-namespace Sortcery;
+namespace Sortcery.Api;
 
 public class WeatherForecast
 {

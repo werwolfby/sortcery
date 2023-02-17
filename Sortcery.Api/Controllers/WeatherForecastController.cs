@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace Sortcery.Controllers;
+namespace Sortcery.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
