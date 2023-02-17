@@ -1,3 +1,5 @@
+using Sortcery.Api;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +8,11 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services
+    .AddOptions<FoldersOptions>()
+    .Bind(builder.Configuration.GetSection(FoldersOptions.Folders))
+    .Validate(o => o.IsValid, "Folders options are not valid")
+    .ValidateOnStart();
 
 var app = builder.Build();
 
