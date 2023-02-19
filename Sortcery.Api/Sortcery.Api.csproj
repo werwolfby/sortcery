@@ -19,4 +19,9 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Sortcery.Engine\Sortcery.Engine.csproj" />
+      <ProjectReference Include="..\Sortcery.Model\Sortcery.Model.csproj" />
+    </ItemGroup>
+
 </Project>
