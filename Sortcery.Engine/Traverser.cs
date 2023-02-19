@@ -27,21 +27,21 @@ public class Traverser
                     break;
                 case UnixFileInfo file:
                     // If it's a file, add it to the result
-                    var fileInfo = FromUnixFileInfo(dir, file);
-                    if (!result.ContainsKey(fileInfo.HardLinkId))
+                    var (fileInfo, hardLinkId) = FromUnixFileInfo(dir, file);
+                    if (!result.ContainsKey(hardLinkId))
                     {
-                        result.Add(fileInfo.HardLinkId, fileInfo);
+                        result.Add(hardLinkId, fileInfo);
                     }
                     break;
             }
         }
     }
 
-    private static FileInfo FromUnixFileInfo(FolderInfo dir, UnixFileInfo unixFileInfo)
+    private static (FileInfo, HardLinkId) FromUnixFileInfo(FolderInfo dir, UnixFileInfo unixFileInfo)
     {
         var relativePath = unixFileInfo.FullName[(dir.FullName.Length + 1)..];
         var hardLinkId = FromUnixFileInfo(unixFileInfo);
-        return new FileInfo(dir, relativePath, hardLinkId);
+        return (new FileInfo(dir, relativePath), hardLinkId);
     }
 
     private static HardLinkId FromUnixFileInfo(UnixFileInfo unixFileInfo)
