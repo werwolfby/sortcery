@@ -11,6 +11,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.1" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -22,6 +23,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Sortcery.Engine\Sortcery.Engine.csproj" />
       <ProjectReference Include="..\Sortcery.Model\Sortcery.Model.csproj" />
+      <ProjectReference Include="..\Sortcery.Web\Sortcery.Web.csproj" />
     </ItemGroup>
 
 </Project>
