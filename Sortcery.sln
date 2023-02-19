@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sortcery.Model", "Sortcery.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sortcery.Engine", "Sortcery.Engine\Sortcery.Engine.csproj", "{C4A7F10C-53F5-4265-89DD-1A1AC5F80756}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sortcery.Engine.UnitTests", "Sortcery.Engine.UnitTests\Sortcery.Engine.UnitTests.csproj", "{3358088D-2887-43CB-9FC7-C3387EFCC76C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{C4A7F10C-53F5-4265-89DD-1A1AC5F80756}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4A7F10C-53F5-4265-89DD-1A1AC5F80756}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4A7F10C-53F5-4265-89DD-1A1AC5F80756}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3358088D-2887-43CB-9FC7-C3387EFCC76C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3358088D-2887-43CB-9FC7-C3387EFCC76C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3358088D-2887-43CB-9FC7-C3387EFCC76C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3358088D-2887-43CB-9FC7-C3387EFCC76C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
