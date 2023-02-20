@@ -21,6 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Sortcery.Api.Contracts\Sortcery.Api.Contracts.csproj" />
       <ProjectReference Include="..\Sortcery.Engine\Sortcery.Engine.csproj" />
       <ProjectReference Include="..\Sortcery.Model\Sortcery.Model.csproj" />
       <ProjectReference Include="..\Sortcery.Web\Sortcery.Web.csproj" />

@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sortcery.Engine.UnitTests",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sortcery.Web", "Sortcery.Web\Sortcery.Web.csproj", "{A61E0249-5697-4C98-86EB-CBF361E3ABAF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sortcery.Api.Contracts", "Sortcery.Api.Contracts\Sortcery.Api.Contracts.csproj", "{13B625C6-F45D-4F54-AA43-229E0CC89410}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{A61E0249-5697-4C98-86EB-CBF361E3ABAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A61E0249-5697-4C98-86EB-CBF361E3ABAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A61E0249-5697-4C98-86EB-CBF361E3ABAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13B625C6-F45D-4F54-AA43-229E0CC89410}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13B625C6-F45D-4F54-AA43-229E0CC89410}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13B625C6-F45D-4F54-AA43-229E0CC89410}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13B625C6-F45D-4F54-AA43-229E0CC89410}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

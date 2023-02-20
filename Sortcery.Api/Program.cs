@@ -1,4 +1,6 @@
 using Sortcery.Api;
+using Sortcery.Api.Services;
+using Sortcery.Api.Services.Contracts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,7 @@ builder.Services
     .Bind(builder.Configuration.GetSection(FoldersOptions.Folders))
     .Validate(o => o.IsValid, "Folders options are not valid")
     .ValidateOnStart();
+builder.Services.AddSingleton<IFoldersService, FoldersService>();
 
 var app = builder.Build();
 

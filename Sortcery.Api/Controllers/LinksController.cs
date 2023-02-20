@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Sortcery.Api.Mapper;
+using Sortcery.Api.Services.Contracts;
 using Sortcery.Engine;
 using Sortcery.Model;
 
@@ -9,23 +11,20 @@ namespace Sortcery.Api.Controllers;
 [Route("api/links")]
 public class LinksController : ControllerBase
 {
-    private readonly IOptions<FoldersOptions> _foldersOptions;
-    
-    public LinksController(IOptions<FoldersOptions> foldersOptions)
+    private readonly IFoldersService _foldersService;
+
+    public LinksController(IFoldersService foldersService)
     {
-        _foldersOptions = foldersOptions;
+        _foldersService = foldersService;
     }
     
     [HttpGet]
     public IActionResult Get()
     {
-        var sourceFolder = new FolderInfo(_foldersOptions.Value.Source);
-        var moviesFolder = new FolderInfo(_foldersOptions.Value.Movies);
-        var seriesFolder = new FolderInfo(_foldersOptions.Value.Series);
-        
         var linker = new Linker();
-        var links = linker.FindLinks(sourceFolder, new []{moviesFolder, seriesFolder});
+        var links = 
+            linker.FindLinks(_foldersService.SourceFolder, _foldersService.DestinationFolders);
 
-        return Ok(links);
+        return Ok(links.ToHardLinkInfo(_foldersService.FoldersMap));
     }
 }

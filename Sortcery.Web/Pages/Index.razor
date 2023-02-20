@@ -1,7 +1,55 @@
 ﻿@page "/"
+@using Sortcery.Api.Contracts.Models
+@inject HttpClient Http
 
-<h1>Hello, world!</h1>
+@if (links == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+  <table class="table table-sm table-hover">
+    <thead>
+    <tr>
+      <th scope="col" style="width: 50%">Source</th>
+      <th scope="col" style="width: 50%">
+        <span>Destination</span>
+        <button type="button" class="btn btn-primary btn-sm">Guess All</button>
+        <button type="button" class="btn btn-success btn-sm">Link All</button>
+      </th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var link in links)
+    {
+      <tr>
+        @if (link.Source != null)
+        {
+          <td>@link.Source?.RelativePath</td>
+        }
+        else
+        {
+          <td><i>stale</i></td>
+        }
+        @if (link.Targets.Count > 0)
+        {
+          <td>@link.Targets[0].RelativePath</td>
+        }
+        else
+        {
+          <td><i>no link yet</i></td>
+        }
+      </tr>
+    }
+    </tbody>
+  </table>
+}
 
-Welcome to your new app.
+@code {
+  private HardLinkInfo[] links;
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+  protected override async Task OnInitializedAsync()
+  {
+    links = await Http.GetFromJsonAsync<HardLinkInfo[]>("api/links");
+  }
+}
