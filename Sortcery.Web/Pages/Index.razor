@@ -23,22 +23,22 @@ else
     @foreach (var link in links)
     {
       <tr>
-        @if (link.Source != null)
-        {
-          <td>@link.Source?.RelativePath</td>
-        }
-        else
-        {
-          <td><i>stale</i></td>
-        }
-        @if (link.Targets.Count > 0)
-        {
-          <td>@link.Targets[0].RelativePath</td>
-        }
-        else
-        {
-          <td><i>no link yet</i></td>
-        }
+        <td>
+          <FileInfo File="link.Source"></FileInfo>
+        </td>
+        <td>
+          @if (link.Targets.Count > 0)
+          {
+            @foreach(var target in link.Targets)
+            {
+              <FileInfo File="target"></FileInfo>
+            }
+          }
+          else
+          {
+            <i>---</i>
+          }
+        </td>
       </tr>
     }
     </tbody>

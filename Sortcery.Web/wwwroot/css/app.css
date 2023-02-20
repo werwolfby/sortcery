@@ -137,6 +137,10 @@ app {
         top: 0.5rem;
     }
 
+.folder-path {
+    border-bottom: 1px dashed #ddd;
+}
+
 @media (max-width: 767.98px) {
     .main .top-row:not(.auth) {
         display: none;
