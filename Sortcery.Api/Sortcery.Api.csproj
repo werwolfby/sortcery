@@ -6,6 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <RootNamespace>Sortcery.Api</RootNamespace>
+        <UserSecretsId>4a94ce01-4d1e-41c2-9cf7-6151c6cdee4f</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
