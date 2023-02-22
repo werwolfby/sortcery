@@ -9,11 +9,11 @@ public class Tests
     public class FindLinksTestCase : IEnumerable
     {
         public (int inode, string filePath)[] SourceFiles { get; set; }
-        
+
         public (int inode, string filePath)[] TargetFiles { get; set; }
-        
+
         public (string? source, string[] targets)[] ExpectedLinks { get; set; }
-        
+
         public IEnumerator GetEnumerator()
         {
             yield return SourceFiles;
@@ -24,8 +24,8 @@ public class Tests
 
     [TestCaseSource(nameof(FindLinksTestCases))]
     public void Linker_FindLinks(
-        (int inode, string filePath)[] sourceFiles, 
-        (int inode, string filePath)[] targetFiles, 
+        (int inode, string filePath)[] sourceFiles,
+        (int inode, string filePath)[] targetFiles,
         (string? source, string[] targets)[] expectedLinks)
     {
         // Arrange
@@ -34,16 +34,16 @@ public class Tests
         var targetDir = new FolderInfo("D:\\Video\\Movies");
         var source = sourceFiles
             .ToDictionary(
-                x => new HardLinkId(x.inode, 0),
+                x => NewHardLinkId(x.inode),
                 x => new FileInfo(sourceDir, x.filePath));
         var target1 = (IReadOnlyDictionary<HardLinkId, FileInfo>)targetFiles
             .ToDictionary(
-                x => new HardLinkId(x.inode, 0),
+                x => NewHardLinkId(x.inode),
                 x => new FileInfo(targetDir, x.filePath));
-        
+
         // Act
         var links = linker.FindLinks(source, new[] {(targetDir, target1)});
-        
+
         // Assert
         Assert.That(links, Has.Count.EqualTo(links.Count));
         foreach (var (s, targets) in expectedLinks)
@@ -60,6 +60,15 @@ public class Tests
                 Assert.That(link.Targets.Select(x => x.RelativePath), Is.EquivalentTo(targets));
             }
         }
+    }
+
+    private static HardLinkId NewHardLinkId(int inode)
+    {
+        #if _WINDOWS
+        return new HardLinkId((uint)inode, 0, 0);
+        #else
+        return new HardLinkId(inode, 0);
+        #endif
     }
 
 
@@ -110,7 +119,7 @@ public class Tests
                 (null, new[] { "d.txt" }),
             }
         }.Cast<object>().ToArray();
-        
+
         yield return new FindLinksTestCase
         {
             SourceFiles = new[]

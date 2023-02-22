@@ -20,4 +20,8 @@
       <ProjectReference Include="..\Sortcery.Engine\Sortcery.Engine.csproj" />
     </ItemGroup>
 
+    <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+        <DefineConstants>_WINDOWS</DefineConstants>
+    </PropertyGroup>
+    
 </Project>
