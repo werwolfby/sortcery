@@ -30,6 +30,8 @@ public class WinApi
         }
     }
 
+    public static bool CreateHardLink(string targetPath, string sourcePath) => CreateHardLink(targetPath, sourcePath, IntPtr.Zero);
+
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern IntPtr CreateFile(string lpFileName, FileAccess dwDesiredAccess, FileShare dwShareMode, IntPtr lpSecurityAttributes, FileMode dwCreationDisposition, FileAttributes dwFlagsAndAttributes, IntPtr hTemplateFile);
 
@@ -38,6 +40,9 @@ public class WinApi
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool CloseHandle(IntPtr hObject);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool CreateHardLink(string lpFileName, string lpExistingFileName, IntPtr lpSecurityAttributes);
 
     private const int INVALID_HANDLE_VALUE = -1;
 

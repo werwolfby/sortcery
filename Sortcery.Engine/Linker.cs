@@ -11,19 +11,19 @@ public class Linker
         var destinationFolderFiles = destinations
             .Select(x => (Folder: x, Files: x.Traverse()))
             .ToList();
-        
+
         return FindLinks(sourceFiles, destinationFolderFiles);
     }
-    
+
     public IReadOnlyList<HardLinkInfo> FindLinks(
-        IReadOnlyDictionary<HardLinkId, FileInfo> sourceFiles, 
+        IReadOnlyDictionary<HardLinkId, FileInfo> sourceFiles,
         IReadOnlyList<(FolderInfo Folder, IReadOnlyDictionary<HardLinkId, FileInfo> Files)> destinationFolderFiles)
     {
         var maxCapacity = Math.Max(
-            sourceFiles.Count, 
+            sourceFiles.Count,
             destinationFolderFiles.Sum(d => d.Files.Count));
         var result = new Dictionary<HardLinkId,(FileInfo? Source, List<FileInfo>? Targets)>(maxCapacity);
-        
+
         // Find all hardlinks in the source folder
         foreach (var (hardLinkId, fileInfo) in sourceFiles)
         {
@@ -31,7 +31,7 @@ public class Linker
             foreach (var (_, destinationFiles) in destinationFolderFiles)
             {
                 if (!destinationFiles.TryGetValue(hardLinkId, out var destinationFileInfo)) continue;
-                
+
                 if (!result.TryGetValue(hardLinkId, out var hardLinkInfo))
                 {
                     hardLinkInfo = (fileInfo, new List<FileInfo>());
@@ -45,7 +45,7 @@ public class Linker
                 result.Add(hardLinkId, (fileInfo, null));
             }
         }
-        
+
         // Find all hardlinks that exists only in at any destination folder but not in the source folder
         foreach (var (_, destinationFiles) in destinationFolderFiles)
         {
@@ -55,12 +55,14 @@ public class Linker
                 result.Add(hardLinkId, (null, new List<FileInfo> {fileInfo}));
             }
         }
-        
+
         return result
-            .Select(x => 
-                new HardLinkInfo(x.Value.Source, 
-                    x.Value.Targets 
+            .Select(x =>
+                new HardLinkInfo(x.Value.Source,
+                    x.Value.Targets
                     ?? (IReadOnlyList<FileInfo>)Array.Empty<FileInfo>()))
             .ToList();
     }
+
+    public void Link(FileInfo sourceFile, FileInfo destinationFile) => sourceFile.Link(destinationFile);
 }

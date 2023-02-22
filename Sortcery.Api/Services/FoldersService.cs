@@ -11,25 +11,30 @@ public class FoldersService : IFoldersService
     public FoldersService(IOptions<FoldersOptions> foldersOptions)
     {
         _foldersOptions = foldersOptions;
-        
+
         SourceFolder = new FolderInfo(_foldersOptions.Value.Source);
         DestinationFolders = new []
         {
             new FolderInfo(_foldersOptions.Value.Movies),
             new FolderInfo(_foldersOptions.Value.Series)
         };
-        
-        FoldersMap = new Dictionary<FolderInfo, string>
+
+        FoldersToNameMap = new Dictionary<FolderInfo, string>
         {
             {SourceFolder, "Source"},
             {DestinationFolders[0], "Movies"},
             {DestinationFolders[1], "Series"}
         };
+
+        NameToFolderMap = FoldersToNameMap
+            .ToDictionary(x => x.Value, x => x.Key);
     }
-    
+
     public FolderInfo SourceFolder { get; }
 
     public IReadOnlyList<FolderInfo> DestinationFolders { get; }
 
-    public IReadOnlyDictionary<FolderInfo, string> FoldersMap { get; }
+    public IReadOnlyDictionary<FolderInfo, string> FoldersToNameMap { get; }
+
+    public IReadOnlyDictionary<string, FolderInfo> NameToFolderMap { get; }
 }
