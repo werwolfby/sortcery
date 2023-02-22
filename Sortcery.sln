@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sortcery.Api", "Sortcery.Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Labratory", "Labratory\Labratory.csproj", "{600BD278-3F1A-44AA-8375-9CF9167262C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sortcery.Model", "Sortcery.Model\Sortcery.Model.csproj", "{8546A64B-2376-409E-987E-F7AAD69C1356}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sortcery.Engine.Contracts", "Sortcery.Engine.Contracts\Sortcery.Engine.Contracts.csproj", "{8546A64B-2376-409E-987E-F7AAD69C1356}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sortcery.Engine", "Sortcery.Engine\Sortcery.Engine.csproj", "{C4A7F10C-53F5-4265-89DD-1A1AC5F80756}"
 EndProject

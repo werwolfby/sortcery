@@ -1,5 +1,5 @@
-using Sortcery.Model;
-using FileInfo = Sortcery.Model.FileInfo;
+using Sortcery.Engine.Contracts;
+using FileInfo = Sortcery.Engine.Contracts.FileInfo;
 
 namespace Sortcery.Engine;
 

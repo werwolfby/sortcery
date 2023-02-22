@@ -1,4 +1,4 @@
-using Sortcery.Model;
+using Sortcery.Engine.Contracts;
 using HardLinkInfoContract = Sortcery.Api.Contracts.Models.HardLinkInfo;
 
 namespace Sortcery.Api.Mapper;

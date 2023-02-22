@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Sortcery.Model\Sortcery.Model.csproj" />
+      <ProjectReference Include="..\Sortcery.Engine.Contracts\Sortcery.Engine.Contracts.csproj" />
     </ItemGroup>
 
     <ItemGroup Condition="!$([MSBuild]::IsOSPlatform('Windows'))">

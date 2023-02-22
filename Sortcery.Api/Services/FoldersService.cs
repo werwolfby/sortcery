@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 using Sortcery.Api.Services.Contracts;
-using Sortcery.Model;
+using Sortcery.Engine.Contracts;
 
 namespace Sortcery.Api.Services;
 

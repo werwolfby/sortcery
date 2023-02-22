@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using Sortcery.Api.Mapper;
 using Sortcery.Api.Services.Contracts;
 using Sortcery.Engine;
-using Sortcery.Model;
 
 namespace Sortcery.Api.Controllers;
 

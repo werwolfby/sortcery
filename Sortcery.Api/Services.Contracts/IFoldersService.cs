@@ -1,4 +1,4 @@
-using Sortcery.Model;
+using Sortcery.Engine.Contracts;
 
 namespace Sortcery.Api.Services.Contracts;
 
