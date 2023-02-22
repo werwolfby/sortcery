@@ -1,6 +1,9 @@
+using Microsoft.Extensions.Options;
 using Sortcery.Api;
 using Sortcery.Api.Services;
 using Sortcery.Api.Services.Contracts;
+using Sortcery.Engine;
+using Sortcery.Engine.Contracts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,11 +14,21 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services
+    .AddOptions<GuessItOptions>()
+    .Bind(builder.Configuration.GetSection(GuessItOptions.GuessIt))
+    .ValidateOnStart();
+builder.Services
     .AddOptions<FoldersOptions>()
     .Bind(builder.Configuration.GetSection(FoldersOptions.Folders))
     .Validate(o => o.IsValid, "Folders options are not valid")
     .ValidateOnStart();
 builder.Services.AddSingleton<IFoldersService, FoldersService>();
+builder.Services.AddSingleton<IGuessItApi, GuessItApi>();
+builder.Services.AddHttpClient<IGuessItApi, GuessItApi>((sp, client) =>
+{
+    var options = sp.GetService<IOptions<GuessItOptions>>();
+    client.BaseAddress = new Uri(options!.Value.Url);
+});
 
 var app = builder.Build();
 

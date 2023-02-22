@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using Sortcery.Api.Contracts.Models
+@using Microsoft.AspNetCore.WebUtilities
 @inject HttpClient Http
 
 @if (links == null)
@@ -36,7 +37,7 @@ else
           }
           else
           {
-            <i>---</i>
+            <button type="button" class="btn btn-primary btn-sm" @onclick="async e => await GuessIt(link)">Guess It</button>
           }
         </td>
       </tr>
@@ -47,6 +48,15 @@ else
 
 @code {
   private HardLinkInfo[] links;
+
+  private async Task GuessIt(HardLinkInfo link)
+  {
+    var query = QueryHelpers.AddQueryString("api/links", "filename", link.Source.RelativePath);
+    var guessResponse = await Http.PostAsync(query, null);
+    guessResponse.EnsureSuccessStatusCode();
+    var guess = await guessResponse.Content.ReadFromJsonAsync<Sortcery.Api.Contracts.Models.FileInfo>();
+    link.Targets.Add(guess);
+  }
 
   protected override async Task OnInitializedAsync()
   {
