@@ -8,7 +8,9 @@ public interface IFoldersService
 
     IReadOnlyList<FolderData> DestinationFolders { get; }
 
-    IReadOnlyDictionary<FolderData, string> FoldersToNameMap { get; }
-
-    IReadOnlyDictionary<string, FolderData> NameToFolderMap { get; }
+    bool TryGetDestinationFolder(string dir, out FolderData? folderData)
+    {
+        folderData = DestinationFolders.FirstOrDefault(x => x.Name == dir);
+        return folderData != null;
+    }
 }

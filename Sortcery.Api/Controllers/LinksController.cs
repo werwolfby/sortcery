@@ -26,7 +26,7 @@ public class LinksController : ControllerBase
         var links =
             linker.FindLinks(_foldersService.SourceFolder, _foldersService.DestinationFolders);
 
-        return Ok(links.ToHardLinkData(_foldersService.FoldersToNameMap));
+        return Ok(links.ToHardLinkData());
     }
 
     [HttpPost]
@@ -39,23 +39,23 @@ public class LinksController : ControllerBase
             : _foldersService.DestinationFolders[1];
         var fileData = new FileData(dir, filename);
 
-        return Ok(fileData.ToFileData(_foldersService.FoldersToNameMap));
+        return Ok(fileData.ToFileData());
     }
 
     [HttpPost("{dir}/{*relativePath}")]
     public IActionResult Link(string dir, string relativePath, [FromBody]Contracts.Models.FileData body)
     {
-        if (!_foldersService.NameToFolderMap.TryGetValue(dir, out var sourceFolder))
+        if (_foldersService.SourceFolder.Name != dir)
         {
-            return NotFound($"Unknown folder: {dir}");
+            return NotFound($"Unknown source folder: {dir}");
         }
 
-        if (!_foldersService.NameToFolderMap.TryGetValue(body.Dir, out var destinationFolder))
+        if (!_foldersService.TryGetDestinationFolder(body.Dir, out var destinationFolder))
         {
-            return BadRequest($"Unknown folder: {body.Dir}");
+            return BadRequest($"Unknow destination folder: {body.Dir}");
         }
 
-        var sourceFile = new FileData(sourceFolder, relativePath);
+        var sourceFile = new FileData(_foldersService.SourceFolder, relativePath);
         var destinationFile = new FileData(destinationFolder, body.RelativePath);
 
         var linker = new Linker();

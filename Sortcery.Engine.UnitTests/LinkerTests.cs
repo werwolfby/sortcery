@@ -7,11 +7,11 @@ public class Tests
 {
     public class FindLinksTestCase : IEnumerable
     {
-        public (int inode, string filePath)[] SourceFiles { get; set; }
+        public (int inode, string filePath)[]? SourceFiles { get; set; }
 
-        public (int inode, string filePath)[] TargetFiles { get; set; }
+        public (int inode, string filePath)[]? TargetFiles { get; set; }
 
-        public (string? source, string[] targets)[] ExpectedLinks { get; set; }
+        public (string? source, string[] targets)[]? ExpectedLinks { get; set; }
 
         public IEnumerator GetEnumerator()
         {
@@ -28,9 +28,9 @@ public class Tests
         (string? source, string[] targets)[] expectedLinks)
     {
         // Arrange
-        var linker = new Linker();
-        var sourceDir = new FolderData("D:\\Downloads\\Sources");
-        var targetDir = new FolderData("D:\\Video\\Movies");
+        var linker = new Linker(null);
+        var sourceDir = new FolderData(FolderType.Source, "/Downloads/Completed");
+        var targetDir = new FolderData(FolderType.Movies, "/Video/Movies");
         var source = sourceFiles
             .ToDictionary(
                 x => NewHardLinkId(x.inode),

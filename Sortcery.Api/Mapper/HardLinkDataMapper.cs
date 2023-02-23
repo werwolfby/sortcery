@@ -4,17 +4,17 @@ namespace Sortcery.Api.Mapper;
 
 public static class HardLinkDataMapper
 {
-    public static Contracts.Models.HardLinkData ToHardLinkData(this HardLinkData hardLinkData, IReadOnlyDictionary<FolderData, string> foldersMap)
+    public static Contracts.Models.HardLinkData ToHardLinkData(this HardLinkData hardLinkData)
     {
         return new()
         {
-            Source = hardLinkData.Source?.ToFileData(foldersMap),
-            Targets = hardLinkData.Targets.Select(x => x.ToFileData(foldersMap)).ToList()
+            Source = hardLinkData.Source?.ToFileData(),
+            Targets = hardLinkData.Targets.Select(x => x.ToFileData()).ToList()
         };
     }
 
-    public static List<Contracts.Models.HardLinkData> ToHardLinkData(this IReadOnlyList<HardLinkData> hardLinks, IReadOnlyDictionary<FolderData, string> foldersMap)
+    public static List<Contracts.Models.HardLinkData> ToHardLinkData(this IReadOnlyList<HardLinkData> hardLinks)
     {
-        return hardLinks.Select(x => x.ToHardLinkData(foldersMap)).ToList();
+        return hardLinks.Select(x => x.ToHardLinkData()).ToList();
     }
 }
