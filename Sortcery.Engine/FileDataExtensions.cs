@@ -7,9 +7,9 @@ using Sortcery.Engine.Contracts;
 
 namespace Sortcery.Engine;
 
-public static class FileDataExtensions
+internal static class FileDataExtensions
 {
-    public static void Link(this FileData file, FileData target)
+    internal static void Link(this FileData file, FileData target)
     {
         var sourcePath = Path.Join(file.Dir.FullName, file.RelativePath);
         var targetPath = Path.Join(target.Dir.FullName, target.RelativePath);

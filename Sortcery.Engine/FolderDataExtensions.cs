@@ -11,9 +11,9 @@ using SortceryFileInfo = Mono.Unix.UnixFileInfo;
 
 namespace Sortcery.Engine;
 
-public static class FolderDataExtensions
+internal static class FolderDataExtensions
 {
-    public static IReadOnlyDictionary<HardLinkId, FileData> Traverse(this FolderData dir)
+    internal static IReadOnlyDictionary<HardLinkId, FileData> Traverse(this FolderData dir)
     {
         var files = new Dictionary<HardLinkId, FileData>();
         var unixDir = new SortceryDirectoryInfo(dir.FullName);

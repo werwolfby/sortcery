@@ -14,7 +14,7 @@ public class Linker
         return FindLinks(sourceFiles, destinationFolderFiles);
     }
 
-    public IReadOnlyList<HardLinkData> FindLinks(
+    internal IReadOnlyList<HardLinkData> FindLinks(
         IReadOnlyDictionary<HardLinkId, FileData> sourceFiles,
         IReadOnlyList<(FolderData Folder, IReadOnlyDictionary<HardLinkId, FileData> Files)> destinationFolderFiles)
     {
