@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Sortcery.Api.Mapper;
-using Sortcery.Api.Services.Contracts;
 using Sortcery.Engine;
 using Sortcery.Engine.Contracts;
 
@@ -10,21 +9,20 @@ namespace Sortcery.Api.Controllers;
 [Route("api/links")]
 public class LinksController : ControllerBase
 {
-    private readonly IFoldersService _foldersService;
+    private readonly IFoldersProvider _foldersProvider;
     private readonly IGuessItApi _guessItApi;
 
-    public LinksController(IFoldersService foldersService, IGuessItApi guessItApi)
+    public LinksController(IFoldersProvider foldersProvider, IGuessItApi guessItApi)
     {
-        _foldersService = foldersService;
+        _foldersProvider = foldersProvider;
         _guessItApi = guessItApi;
     }
 
     [HttpGet]
     public IActionResult Get()
     {
-        var linker = new Linker();
-        var links =
-            linker.FindLinks(_foldersService.SourceFolder, _foldersService.DestinationFolders);
+        var linker = new Linker(_foldersProvider);
+        var links = linker.FindLinks();
 
         return Ok(links.ToHardLinkData());
     }
@@ -35,8 +33,8 @@ public class LinksController : ControllerBase
         var guess = await _guessItApi.GuessAsync(filename);
 
         var dir = guess.Type == "movie"
-            ? _foldersService.DestinationFolders[0]
-            : _foldersService.DestinationFolders[1];
+            ? _foldersProvider.DestinationFolders[0]
+            : _foldersProvider.DestinationFolders[1];
         var fileData = new FileData(dir, filename);
 
         return Ok(fileData.ToFileData());
@@ -45,20 +43,20 @@ public class LinksController : ControllerBase
     [HttpPost("{dir}/{*relativePath}")]
     public IActionResult Link(string dir, string relativePath, [FromBody]Contracts.Models.FileData body)
     {
-        if (_foldersService.SourceFolder.Name != dir)
+        if (_foldersProvider.Source.Name != dir)
         {
             return NotFound($"Unknown source folder: {dir}");
         }
 
-        if (!_foldersService.TryGetDestinationFolder(body.Dir, out var destinationFolder))
+        if (!_foldersProvider.TryGetDestinationFolder(body.Dir, out var destinationFolder))
         {
-            return BadRequest($"Unknow destination folder: {body.Dir}");
+            return BadRequest($"Unknown destination folder: {body.Dir}");
         }
 
-        var sourceFile = new FileData(_foldersService.SourceFolder, relativePath);
-        var destinationFile = new FileData(destinationFolder, body.RelativePath);
+        var sourceFile = new FileData(_foldersProvider.Source, relativePath);
+        var destinationFile = new FileData(destinationFolder!, body.RelativePath);
 
-        var linker = new Linker();
+        var linker = new Linker(_foldersProvider);
         linker.Link(sourceFile, destinationFile);
 
         return Created($"{dir}/{relativePath}", null);

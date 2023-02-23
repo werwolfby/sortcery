@@ -1,10 +1,8 @@
-using Sortcery.Engine.Contracts;
+namespace Sortcery.Engine.Contracts;
 
-namespace Sortcery.Api.Services.Contracts;
-
-public interface IFoldersService
+public interface IFoldersProvider
 {
-    FolderData SourceFolder { get; }
+    public FolderData Source { get; }
 
     IReadOnlyList<FolderData> DestinationFolders { get; }
 

@@ -4,10 +4,17 @@ namespace Sortcery.Engine;
 
 public class Linker
 {
-    public IReadOnlyList<HardLinkData> FindLinks(FolderData source, IReadOnlyList<FolderData> destinations)
+    private readonly IFoldersProvider _foldersProvider;
+
+    public Linker(IFoldersProvider foldersProvider)
     {
-        var sourceFiles = source.Traverse();
-        var destinationFolderFiles = destinations
+        _foldersProvider = foldersProvider;
+    }
+
+    public IReadOnlyList<HardLinkData> FindLinks()
+    {
+        var sourceFiles = _foldersProvider.Source.Traverse();
+        var destinationFolderFiles = _foldersProvider.DestinationFolders
             .Select(x => (Folder: x, Files: x.Traverse()))
             .ToList();
 
