@@ -10,22 +10,18 @@ namespace Sortcery.Api.Controllers;
 public class LinksController : ControllerBase
 {
     private readonly IFoldersProvider _foldersProvider;
+    private readonly ILinker _linker;
     private readonly IGuessItApi _guessItApi;
 
-    public LinksController(IFoldersProvider foldersProvider, IGuessItApi guessItApi)
+    public LinksController(IFoldersProvider foldersProvider, ILinker linker, IGuessItApi guessItApi)
     {
         _foldersProvider = foldersProvider;
+        _linker = linker;
         _guessItApi = guessItApi;
     }
 
     [HttpGet]
-    public IActionResult Get()
-    {
-        var linker = new Linker(_foldersProvider);
-        var links = linker.FindLinks();
-
-        return Ok(links.ToHardLinkData());
-    }
+    public IActionResult Get() => Ok(_linker.FindLinks().ToHardLinkData());
 
     [HttpPost]
     public async Task<IActionResult> Guess([FromQuery]string filename)
@@ -56,8 +52,7 @@ public class LinksController : ControllerBase
         var sourceFile = new FileData(_foldersProvider.Source, relativePath);
         var destinationFile = new FileData(destinationFolder!, body.RelativePath);
 
-        var linker = new Linker(_foldersProvider);
-        linker.Link(sourceFile, destinationFile);
+        _linker.Link(sourceFile, destinationFile);
 
         return Created($"{dir}/{relativePath}", null);
     }

@@ -2,7 +2,7 @@ using Sortcery.Engine.Contracts;
 
 namespace Sortcery.Engine;
 
-public class Linker
+public class Linker : ILinker
 {
     private readonly IFoldersProvider _foldersProvider;
 

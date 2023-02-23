@@ -34,6 +34,7 @@ builder.Services.AddHttpClient<IGuessItApi, GuessItApi>((sp, client) =>
     var options = sp.GetService<IOptions<GuessItOptions>>();
     client.BaseAddress = new Uri(options!.Value.Url);
 });
+builder.Services.AddSingleton<ILinker, Linker>();
 
 var app = builder.Build();
 
