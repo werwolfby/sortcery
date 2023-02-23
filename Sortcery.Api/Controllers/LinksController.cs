@@ -3,7 +3,6 @@ using Sortcery.Api.Mapper;
 using Sortcery.Api.Services.Contracts;
 using Sortcery.Engine;
 using Sortcery.Engine.Contracts;
-using FileInfo = Sortcery.Engine.Contracts.FileInfo;
 
 namespace Sortcery.Api.Controllers;
 
@@ -27,7 +26,7 @@ public class LinksController : ControllerBase
         var links =
             linker.FindLinks(_foldersService.SourceFolder, _foldersService.DestinationFolders);
 
-        return Ok(links.ToHardLinkInfo(_foldersService.FoldersToNameMap));
+        return Ok(links.ToHardLinkData(_foldersService.FoldersToNameMap));
     }
 
     [HttpPost]
@@ -38,13 +37,13 @@ public class LinksController : ControllerBase
         var dir = guess.Type == "movie"
             ? _foldersService.DestinationFolders[0]
             : _foldersService.DestinationFolders[1];
-        var fileInfo = new FileInfo(dir, filename);
+        var fileData = new FileData(dir, filename);
 
-        return Ok(fileInfo.ToFileInfo(_foldersService.FoldersToNameMap));
+        return Ok(fileData.ToFileData(_foldersService.FoldersToNameMap));
     }
 
     [HttpPost("{dir}/{*relativePath}")]
-    public IActionResult Link(string dir, string relativePath, [FromBody]Contracts.Models.FileInfo body)
+    public IActionResult Link(string dir, string relativePath, [FromBody]Contracts.Models.FileData body)
     {
         if (!_foldersService.NameToFolderMap.TryGetValue(dir, out var sourceFolder))
         {
@@ -56,8 +55,8 @@ public class LinksController : ControllerBase
             return BadRequest($"Unknown folder: {body.Dir}");
         }
 
-        var sourceFile = new FileInfo(sourceFolder, relativePath);
-        var destinationFile = new FileInfo(destinationFolder, body.RelativePath);
+        var sourceFile = new FileData(sourceFolder, relativePath);
+        var destinationFile = new FileData(destinationFolder, body.RelativePath);
 
         var linker = new Linker();
         linker.Link(sourceFile, destinationFile);

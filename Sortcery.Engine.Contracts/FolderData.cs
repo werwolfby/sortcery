@@ -1,11 +1,11 @@
 namespace Sortcery.Engine.Contracts;
 
-public class FolderInfo
+public class FolderData
 {
-    public FolderInfo(string fullName)
+    public FolderData(string fullName)
     {
         FullName = fullName;
     }
-    
+
     public string FullName { get; }
 }

@@ -1,11 +1,10 @@
 using Sortcery.Engine.Contracts;
-using FileInfo = Sortcery.Engine.Contracts.FileInfo;
 
 namespace Sortcery.Engine;
 
 public class Linker
 {
-    public IReadOnlyList<HardLinkInfo> FindLinks(FolderInfo source, IReadOnlyList<FolderInfo> destinations)
+    public IReadOnlyList<HardLinkData> FindLinks(FolderData source, IReadOnlyList<FolderData> destinations)
     {
         var sourceFiles = source.Traverse();
         var destinationFolderFiles = destinations
@@ -15,54 +14,54 @@ public class Linker
         return FindLinks(sourceFiles, destinationFolderFiles);
     }
 
-    public IReadOnlyList<HardLinkInfo> FindLinks(
-        IReadOnlyDictionary<HardLinkId, FileInfo> sourceFiles,
-        IReadOnlyList<(FolderInfo Folder, IReadOnlyDictionary<HardLinkId, FileInfo> Files)> destinationFolderFiles)
+    public IReadOnlyList<HardLinkData> FindLinks(
+        IReadOnlyDictionary<HardLinkId, FileData> sourceFiles,
+        IReadOnlyList<(FolderData Folder, IReadOnlyDictionary<HardLinkId, FileData> Files)> destinationFolderFiles)
     {
         var maxCapacity = Math.Max(
             sourceFiles.Count,
             destinationFolderFiles.Sum(d => d.Files.Count));
-        var result = new Dictionary<HardLinkId,(FileInfo? Source, List<FileInfo>? Targets)>(maxCapacity);
+        var result = new Dictionary<HardLinkId,(FileData? Source, List<FileData>? Targets)>(maxCapacity);
 
         // Find all hardlinks in the source folder
-        foreach (var (hardLinkId, fileInfo) in sourceFiles)
+        foreach (var (hardLinkId, fileData) in sourceFiles)
         {
             var exists = false;
             foreach (var (_, destinationFiles) in destinationFolderFiles)
             {
-                if (!destinationFiles.TryGetValue(hardLinkId, out var destinationFileInfo)) continue;
+                if (!destinationFiles.TryGetValue(hardLinkId, out var destinationFileData)) continue;
 
-                if (!result.TryGetValue(hardLinkId, out var hardLinkInfo))
+                if (!result.TryGetValue(hardLinkId, out var hardLinkData))
                 {
-                    hardLinkInfo = (fileInfo, new List<FileInfo>());
-                    result.Add(hardLinkId, hardLinkInfo);
+                    hardLinkData = (fileData, new List<FileData>());
+                    result.Add(hardLinkId, hardLinkData);
                 }
-                hardLinkInfo.Targets!.Add(destinationFileInfo);
+                hardLinkData.Targets!.Add(destinationFileData);
                 exists = true;
             }
             if (!exists)
             {
-                result.Add(hardLinkId, (fileInfo, null));
+                result.Add(hardLinkId, (fileData, null));
             }
         }
 
         // Find all hardlinks that exists only in at any destination folder but not in the source folder
         foreach (var (_, destinationFiles) in destinationFolderFiles)
         {
-            foreach (var (hardLinkId, fileInfo) in destinationFiles)
+            foreach (var (hardLinkId, fileData) in destinationFiles)
             {
                 if (result.ContainsKey(hardLinkId)) continue;
-                result.Add(hardLinkId, (null, new List<FileInfo> {fileInfo}));
+                result.Add(hardLinkId, (null, new List<FileData> {fileData}));
             }
         }
 
         return result
             .Select(x =>
-                new HardLinkInfo(x.Value.Source,
+                new HardLinkData(x.Value.Source,
                     x.Value.Targets
-                    ?? (IReadOnlyList<FileInfo>)Array.Empty<FileInfo>()))
+                    ?? (IReadOnlyList<FileData>)Array.Empty<FileData>()))
             .ToList();
     }
 
-    public void Link(FileInfo sourceFile, FileInfo destinationFile) => sourceFile.Link(destinationFile);
+    public void Link(FileData sourceFile, FileData destinationFile) => sourceFile.Link(destinationFile);
 }

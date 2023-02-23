@@ -1,5 +1,4 @@
 using Sortcery.Engine.Contracts;
-using FileInfo = Sortcery.Engine.Contracts.FileInfo;
 #if _WINDOWS
 using SortceryFileSystemInfo = System.IO.FileSystemInfo;
 using SortceryDirectoryInfo = System.IO.DirectoryInfo;
@@ -12,17 +11,17 @@ using SortceryFileInfo = Mono.Unix.UnixFileInfo;
 
 namespace Sortcery.Engine;
 
-public static class FolderInfoExtensions
+public static class FolderDataExtensions
 {
-    public static IReadOnlyDictionary<HardLinkId, FileInfo> Traverse(this FolderInfo dir)
+    public static IReadOnlyDictionary<HardLinkId, FileData> Traverse(this FolderData dir)
     {
-        var files = new Dictionary<HardLinkId, FileInfo>();
+        var files = new Dictionary<HardLinkId, FileData>();
         var unixDir = new SortceryDirectoryInfo(dir.FullName);
         Traverse(dir, unixDir, files);
         return files;
     }
 
-    private static void Traverse(FolderInfo dir, SortceryDirectoryInfo currentDir, Dictionary<HardLinkId,FileInfo> result)
+    private static void Traverse(FolderData dir, SortceryDirectoryInfo currentDir, Dictionary<HardLinkId,FileData> result)
     {
         // Traverse all over GetSystemEntries() to get all files and directories
         foreach (var entry in currentDir.GetFileSystemEntries())
@@ -35,16 +34,16 @@ public static class FolderInfoExtensions
                     break;
                 case SortceryFileInfo file:
                     // If it's a file, add it to the result
-                    var (fileInfo, hardLinkId) = FromUnixFileInfo(dir, file);
+                    var (fileData, hardLinkId) = FromSortceryFileInfo(dir, file);
                     if (!result.ContainsKey(hardLinkId))
                     {
-                        result.Add(hardLinkId, fileInfo);
+                        result.Add(hardLinkId, fileData);
                     }
                     break;
             }
         }
     }
-    
+
     #if _WINDOWS
     private static IEnumerable<SortceryFileSystemInfo> GetFileSystemEntries(this SortceryDirectoryInfo dir)
     {
@@ -52,14 +51,14 @@ public static class FolderInfoExtensions
     }
     #endif
 
-    private static (FileInfo, HardLinkId) FromUnixFileInfo(FolderInfo dir, SortceryFileInfo fileInfo)
+    private static (FileData, HardLinkId) FromSortceryFileInfo(FolderData dir, SortceryFileInfo fileInfo)
     {
         var relativePath = fileInfo.FullName[(dir.FullName.Length + 1)..];
-        var hardLinkId = FromUnixFileInfo(fileInfo);
-        return (new FileInfo(dir, relativePath), hardLinkId);
+        var hardLinkId = FromSortceryFileInfo(fileInfo);
+        return (new FileData(dir, relativePath), hardLinkId);
     }
 
-    private static HardLinkId FromUnixFileInfo(SortceryFileInfo fileInfo)
+    private static HardLinkId FromSortceryFileInfo(SortceryFileInfo fileInfo)
     {
         #if _WINDOWS
         return WinApi.FromFileInfo(fileInfo);

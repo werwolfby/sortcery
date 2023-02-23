@@ -1,6 +1,5 @@
 using System.Collections;
 using Sortcery.Engine.Contracts;
-using FileInfo = Sortcery.Engine.Contracts.FileInfo;
 
 namespace Sortcery.Engine.UnitTests;
 
@@ -30,16 +29,16 @@ public class Tests
     {
         // Arrange
         var linker = new Linker();
-        var sourceDir = new FolderInfo("D:\\Downloads\\Sources");
-        var targetDir = new FolderInfo("D:\\Video\\Movies");
+        var sourceDir = new FolderData("D:\\Downloads\\Sources");
+        var targetDir = new FolderData("D:\\Video\\Movies");
         var source = sourceFiles
             .ToDictionary(
                 x => NewHardLinkId(x.inode),
-                x => new FileInfo(sourceDir, x.filePath));
-        var target1 = (IReadOnlyDictionary<HardLinkId, FileInfo>)targetFiles
+                x => new FileData(sourceDir, x.filePath));
+        var target1 = (IReadOnlyDictionary<HardLinkId, FileData>)targetFiles
             .ToDictionary(
                 x => NewHardLinkId(x.inode),
-                x => new FileInfo(targetDir, x.filePath));
+                x => new FileData(targetDir, x.filePath));
 
         // Act
         var links = linker.FindLinks(source, new[] {(targetDir, target1)});

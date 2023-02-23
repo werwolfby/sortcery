@@ -4,11 +4,11 @@ namespace Sortcery.Api.Services.Contracts;
 
 public interface IFoldersService
 {
-    FolderInfo SourceFolder { get; }
+    FolderData SourceFolder { get; }
 
-    IReadOnlyList<FolderInfo> DestinationFolders { get; }
+    IReadOnlyList<FolderData> DestinationFolders { get; }
 
-    IReadOnlyDictionary<FolderInfo, string> FoldersToNameMap { get; }
+    IReadOnlyDictionary<FolderData, string> FoldersToNameMap { get; }
 
-    IReadOnlyDictionary<string, FolderInfo> NameToFolderMap { get; }
+    IReadOnlyDictionary<string, FolderData> NameToFolderMap { get; }
 }

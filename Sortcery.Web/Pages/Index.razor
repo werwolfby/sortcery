@@ -59,7 +59,7 @@ else
     var query = QueryHelpers.AddQueryString("api/links", "filename", link.Source!.RelativePath);
     using var guessResponse = await Http.PostAsync(query, null);
     guessResponse.EnsureSuccessStatusCode();
-    var guess = await guessResponse.Content.ReadFromJsonAsync<Sortcery.Api.Contracts.Models.FileInfo>();
+    var guess = await guessResponse.Content.ReadFromJsonAsync<FileData>();
     link.Guess = guess;
     link.Guessing = false;
   }
@@ -80,7 +80,7 @@ else
 
   protected override async Task OnInitializedAsync()
   {
-    var links = await Http.GetFromJsonAsync<HardLinkInfo[]>("api/links");
+    var links = await Http.GetFromJsonAsync<HardLinkData[]>("api/links");
     _links = links.Select(e => new HardLinkViewModel(e)).ToArray();
   }
 }
