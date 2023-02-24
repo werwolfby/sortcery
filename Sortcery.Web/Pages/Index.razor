@@ -17,8 +17,8 @@ else
       <th scope="col" style="width: 50%">Source</th>
       <th scope="col" style="width: 50%">
         <span>Destination</span>
-        <button type="button" class="btn btn-primary btn-sm">Guess All</button>
-        <button type="button" class="btn btn-success btn-sm">Link All</button>
+        <button type="button" class="btn btn-primary btn-xs">Guess All</button>
+        <button type="button" class="btn btn-success btn-xs">Link All</button>
       </th>
     </tr>
     </thead>
@@ -30,19 +30,25 @@ else
           <FileInfo File="link.Source"></FileInfo>
         </td>
         <td>
+          <div>
+          @if (link.CanLink)
+          {
+            <button type="button" class="btn btn-secondary btn-xs"><span>Edit</span></button>
+            <button type="button" class="btn btn-secondary btn-xs" @onclick="e => CancelGuess(link)"><span>Cancel</span></button>
+          }
           @foreach(var target in link.AllTargets)
           {
             <FileInfo File="target"></FileInfo>
           }
           @if (link.CanGuess)
           {
-            <button type="button" class="btn btn-primary btn-sm" disabled="@link.Guessing" @onclick="async e => await GuessIt(link)">Guess It</button>
+            <button type="button" class="btn btn-primary btn-xs" disabled="@link.Guessing" @onclick="async e => await GuessIt(link)">Guess It</button>
           }
           @if (link.CanLink)
           {
-            <button type="button" class="btn btn-secondary btn-sm" @onclick="e => CancelGuess(link)">Cancel</button>
-            <button type="button" class="btn btn-success btn-sm" @onclick="async e => await Link(link)">Link It</button>
+            <button type="button" class="btn btn-success btn-xs" @onclick="async e => await Link(link)">Link It</button>
           }
+          </div>
         </td>
       </tr>
     }
