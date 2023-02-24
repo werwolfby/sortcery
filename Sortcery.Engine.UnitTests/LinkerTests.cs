@@ -28,7 +28,7 @@ public class Tests
         (string? source, string[] targets)[] expectedLinks)
     {
         // Arrange
-        var linker = new Linker(null);
+        var linker = new Linker(null, null);
         var sourceDir = new FolderData(FolderType.Source, "/Downloads/Completed");
         var targetDir = new FolderData(FolderType.Movies, "/Video/Movies");
         var source = sourceFiles

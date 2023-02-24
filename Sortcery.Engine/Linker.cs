@@ -9,17 +9,22 @@ public class Linker : ILinker
     public Linker(IFoldersProvider foldersProvider)
     {
         _foldersProvider = foldersProvider;
+        Links = Array.Empty<HardLinkData>();
     }
 
-    public IReadOnlyList<HardLinkData> FindLinks()
+    public IReadOnlyList<HardLinkData> Links { get; private set; }
+
+    public void Update()
     {
         var sourceFiles = _foldersProvider.Source.Traverse();
         var destinationFolderFiles = _foldersProvider.DestinationFolders
             .Select(x => (Folder: x, Files: x.Traverse()))
             .ToList();
 
-        return FindLinks(sourceFiles, destinationFolderFiles);
+        Links = FindLinks(sourceFiles, destinationFolderFiles);
     }
+
+    public void Link(FileData sourceFile, FileData destinationFile) => sourceFile.Link(destinationFile);
 
     internal IReadOnlyList<HardLinkData> FindLinks(
         IReadOnlyDictionary<HardLinkId, FileData> sourceFiles,
@@ -67,8 +72,7 @@ public class Linker : ILinker
                 new HardLinkData(x.Value.Source,
                     x.Value.Targets
                     ?? (IReadOnlyList<FileData>)Array.Empty<FileData>()))
-            .ToList();
+            .ToList()
+            .AsReadOnly();
     }
-
-    public void Link(FileData sourceFile, FileData destinationFile) => sourceFile.Link(destinationFile);
 }

@@ -21,7 +21,11 @@ public class LinksController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult Get() => Ok(_linker.FindLinks().ToHardLinkData());
+    public IActionResult Get()
+    {
+        _linker.Update();
+        return Ok(_linker.Links.ToHardLinkData());
+    }
 
     [HttpPost]
     public async Task<IActionResult> Guess([FromQuery]string filename)
