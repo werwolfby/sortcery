@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Sortcery.Api.Mapper;
-using Sortcery.Engine;
 using Sortcery.Engine.Contracts;
 
 namespace Sortcery.Api.Controllers;
@@ -11,13 +10,11 @@ public class LinksController : ControllerBase
 {
     private readonly IFoldersProvider _foldersProvider;
     private readonly ILinker _linker;
-    private readonly IGuessItApi _guessItApi;
 
-    public LinksController(IFoldersProvider foldersProvider, ILinker linker, IGuessItApi guessItApi)
+    public LinksController(IFoldersProvider foldersProvider, ILinker linker)
     {
         _foldersProvider = foldersProvider;
         _linker = linker;
-        _guessItApi = guessItApi;
     }
 
     [HttpGet]
@@ -25,19 +22,6 @@ public class LinksController : ControllerBase
     {
         _linker.Update();
         return Ok(_linker.Links.ToHardLinkData());
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Guess([FromQuery]string filename)
-    {
-        var guess = await _guessItApi.GuessAsync(filename);
-
-        var dir = guess.Type == "movie"
-            ? _foldersProvider.DestinationFolders[0]
-            : _foldersProvider.DestinationFolders[1];
-        var fileData = new FileData(dir, filename);
-
-        return Ok(fileData.ToFileData());
     }
 
     [HttpPost("{dir}/{*relativePath}")]
@@ -54,7 +38,7 @@ public class LinksController : ControllerBase
         }
 
         var sourceFile = new FileData(_foldersProvider.Source, relativePath);
-        var destinationFile = new FileData(destinationFolder!, body.RelativePath);
+        var destinationFile = new FileData(destinationFolder, body.RelativePath);
 
         _linker.Link(sourceFile, destinationFile);
 

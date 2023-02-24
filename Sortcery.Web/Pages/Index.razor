@@ -62,11 +62,8 @@ else
   private async Task GuessIt(HardLinkViewModel link)
   {
     link.Guessing = true;
-    var query = QueryHelpers.AddQueryString("api/links", "filename", link.Source!.RelativePath);
-    using var guessResponse = await Http.PostAsync(query, null);
-    guessResponse.EnsureSuccessStatusCode();
-    var guess = await guessResponse.Content.ReadFromJsonAsync<FileData>();
-    link.Guess = guess;
+    var query = Path.Join("api/guess", link.Source!.Dir, link.Source!.RelativePath);
+    link.Guess = await Http.GetFromJsonAsync<FileData>(query);
     link.Guessing = false;
   }
 
