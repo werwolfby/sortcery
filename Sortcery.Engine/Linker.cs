@@ -5,10 +5,12 @@ namespace Sortcery.Engine;
 public class Linker : ILinker
 {
     private readonly IFoldersProvider _foldersProvider;
+    private readonly IGuessItApi _guessItApi;
 
-    public Linker(IFoldersProvider foldersProvider)
+    public Linker(IFoldersProvider foldersProvider, IGuessItApi guessItApi)
     {
         _foldersProvider = foldersProvider;
+        _guessItApi = guessItApi;
         Links = Array.Empty<HardLinkData>();
     }
 
@@ -22,6 +24,18 @@ public class Linker : ILinker
             .ToList();
 
         Links = FindLinks(sourceFiles, destinationFolderFiles);
+    }
+
+    public async Task<FileData> GuessAsync(FileData fileData)
+    {
+        var filename = Path.GetFileName(fileData.RelativePath);
+        var guess = await _guessItApi.GuessAsync(filename);
+        return guess.Type switch
+        {
+            "movie" => GuessMovie(guess, filename),
+            "episode" => GuessEpisode(guess, filename),
+            _ => throw new NotSupportedException($"Unknown guess type: {guess.Type}")
+        };
     }
 
     public void Link(FileData sourceFile, FileData destinationFile) => sourceFile.Link(destinationFile);
@@ -74,5 +88,25 @@ public class Linker : ILinker
                     ?? (IReadOnlyList<FileData>)Array.Empty<FileData>()))
             .ToList()
             .AsReadOnly();
+    }
+
+    private FileData GuessMovie(Guess guess, string filename)
+    {
+        if (!_foldersProvider.TryGetDestinationFolder(FolderType.Movies, out var destinationFolder))
+        {
+            throw new InvalidOperationException("Unknown destination folder: Movies");
+        }
+
+        return new FileData(destinationFolder, filename);
+    }
+
+    private FileData GuessEpisode(Guess guess, string filename)
+    {
+        if (!_foldersProvider.TryGetDestinationFolder(FolderType.Shows, out var destinationFolder))
+        {
+            throw new InvalidOperationException("Unknown destination folder: Series");
+        }
+
+        return new FileData(destinationFolder, Path.Combine(guess.Title, $"Season {guess.Season}", filename));
     }
 }
