@@ -38,7 +38,7 @@ public class LinksController : ControllerBase
         }
 
         var sourceFile = new FileData(_foldersProvider.Source, relativePath);
-        var destinationFile = new FileData(destinationFolder, body.RelativePath);
+        var destinationFile = new FileData(destinationFolder, body.Path, body.Name);
 
         _linker.Link(sourceFile, destinationFile);
 

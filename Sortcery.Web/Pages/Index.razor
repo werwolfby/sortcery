@@ -62,7 +62,7 @@ else
   private async Task GuessIt(HardLinkViewModel link)
   {
     link.Guessing = true;
-    var query = Path.Join("api/guess", link.Source!.Dir, link.Source!.RelativePath);
+    var query = Path.Join("api/guess", link.Source!.FullName);
     link.Guess = await Http.GetFromJsonAsync<FileData>(query);
     link.Guessing = false;
   }
@@ -74,7 +74,7 @@ else
 
   private async Task Link(HardLinkViewModel link)
   {
-    var query = Path.Join("api/links", link.Source!.Dir, link.Source!.RelativePath);
+    var query = Path.Join("api/links", link.Source!.FullName);
     using var linkResponse = await Http.PostAsJsonAsync(query, link.Guess!);
     linkResponse.EnsureSuccessStatusCode();
     link.Targets.Add(link.Guess!);

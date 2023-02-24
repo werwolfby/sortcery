@@ -11,8 +11,10 @@ internal static class FileDataExtensions
 {
     internal static void Link(this FileData file, FileData target)
     {
-        var sourcePath = Path.Join(file.Dir.FullName, file.RelativePath);
-        var targetPath = Path.Join(target.Dir.FullName, target.RelativePath);
+        var sourcePath = file.FullName;
+        var targetPath = target.FullName;
+        var targetFileInfo = new SortceryFileInfo(targetPath);
+        targetFileInfo.Directory!.Create();
         #if _WINDOWS
         WinApi.CreateHardLink(targetPath, sourcePath);
         #else

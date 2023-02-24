@@ -28,12 +28,11 @@ public class Linker : ILinker
 
     public async Task<FileData> GuessAsync(FileData fileData)
     {
-        var filename = Path.GetFileName(fileData.RelativePath);
-        var guess = await _guessItApi.GuessAsync(filename);
+        var guess = await _guessItApi.GuessAsync(fileData.Name);
         return guess.Type switch
         {
-            "movie" => GuessMovie(guess, filename),
-            "episode" => GuessEpisode(guess, filename),
+            "movie" => GuessMovie(guess, fileData.Name),
+            "episode" => GuessEpisode(guess, fileData.Name),
             _ => throw new NotSupportedException($"Unknown guess type: {guess.Type}")
         };
     }
