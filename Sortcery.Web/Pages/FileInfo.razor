@@ -1,0 +1,13 @@
+@if (File != null)
+{   
+    <span class="folder-path text-primary">@File.Dir/</span><span>@File.RelativePath</span>
+}
+else
+{
+    <i>stale</i>
+}
+
+@code {
+    [Parameter]
+    public Api.Contracts.Models.FileInfo File { get; set; }
+}

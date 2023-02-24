@@ -1,4 +1,4 @@
-namespace Sortcery.Model;
+namespace Sortcery.Engine.Contracts;
 
 public class FolderInfo
 {

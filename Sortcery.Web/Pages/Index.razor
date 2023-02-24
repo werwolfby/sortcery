@@ -1,0 +1,86 @@
+﻿@page "/"
+@using Sortcery.Api.Contracts.Models
+@using Microsoft.AspNetCore.WebUtilities
+@using Sortcery.Web.Models
+@using System.IO
+@inject HttpClient Http
+
+@if (_links == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+  <table class="table table-sm table-hover">
+    <thead>
+    <tr>
+      <th scope="col" style="width: 50%">Source</th>
+      <th scope="col" style="width: 50%">
+        <span>Destination</span>
+        <button type="button" class="btn btn-primary btn-sm">Guess All</button>
+        <button type="button" class="btn btn-success btn-sm">Link All</button>
+      </th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var link in _links)
+    {
+      <tr>
+        <td>
+          <FileInfo File="link.Source"></FileInfo>
+        </td>
+        <td>
+          @foreach(var target in link.AllTargets)
+          {
+            <FileInfo File="target"></FileInfo>
+          }
+          @if (link.CanGuess)
+          {
+            <button type="button" class="btn btn-primary btn-sm" disabled="@link.Guessing" @onclick="async e => await GuessIt(link)">Guess It</button>
+          }
+          @if (link.CanLink)
+          {
+            <button type="button" class="btn btn-secondary btn-sm" @onclick="e => CancelGuess(link)">Cancel</button>
+            <button type="button" class="btn btn-success btn-sm" @onclick="async e => await Link(link)">Link It</button>
+          }
+        </td>
+      </tr>
+    }
+    </tbody>
+  </table>
+}
+
+@code {
+  private HardLinkViewModel[]? _links;
+
+  private async Task GuessIt(HardLinkViewModel link)
+  {
+    link.Guessing = true;
+    var query = QueryHelpers.AddQueryString("api/links", "filename", link.Source!.RelativePath);
+    using var guessResponse = await Http.PostAsync(query, null);
+    guessResponse.EnsureSuccessStatusCode();
+    var guess = await guessResponse.Content.ReadFromJsonAsync<Sortcery.Api.Contracts.Models.FileInfo>();
+    link.Guess = guess;
+    link.Guessing = false;
+  }
+
+  private void CancelGuess(HardLinkViewModel link)
+  {
+    link.Guess = null;
+  }
+
+  private async Task Link(HardLinkViewModel link)
+  {
+    var query = Path.Join("api/links", link.Source!.Dir, link.Source!.RelativePath);
+    using var linkResponse = await Http.PostAsJsonAsync(query, link.Guess!);
+    linkResponse.EnsureSuccessStatusCode();
+    link.Targets.Add(link.Guess!);
+    link.Guess = null;
+  }
+
+  protected override async Task OnInitializedAsync()
+  {
+    var links = await Http.GetFromJsonAsync<HardLinkInfo[]>("api/links");
+    _links = links.Select(e => new HardLinkViewModel(e)).ToArray();
+  }
+}
