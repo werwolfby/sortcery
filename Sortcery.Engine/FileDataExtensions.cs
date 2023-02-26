@@ -1,18 +1,20 @@
-using FileInfo = Sortcery.Engine.Contracts.FileInfo;
 #if _WINDOWS
 using SortceryFileInfo = System.IO.FileInfo;
 #else
 using SortceryFileInfo = Mono.Unix.UnixFileInfo;
 #endif
+using Sortcery.Engine.Contracts;
 
 namespace Sortcery.Engine;
 
-public static class FileInfoExtensions
+internal static class FileDataExtensions
 {
-    public static void Link(this FileInfo file, FileInfo target)
+    internal static void Link(this FileData file, FileData target)
     {
-        var sourcePath = Path.Join(file.Dir.FullName, file.RelativePath);
-        var targetPath = Path.Join(target.Dir.FullName, target.RelativePath);
+        var sourcePath = file.FullName;
+        var targetPath = target.FullName;
+        var targetFileInfo = new SortceryFileInfo(targetPath);
+        targetFileInfo.Directory!.Create();
         #if _WINDOWS
         WinApi.CreateHardLink(targetPath, sourcePath);
         #else

@@ -5,26 +5,26 @@ namespace Sortcery.Web.Models
 {
     public class HardLinkViewModel
     {
-        private readonly HardLinkInfo _hardLinkInfo;
+        private readonly HardLinkData _hardLinkData;
 
-        public HardLinkViewModel(HardLinkInfo hardLinkInfo)
+        public HardLinkViewModel(HardLinkData hardLinkData)
         {
-            _hardLinkInfo = hardLinkInfo;
+            _hardLinkData = hardLinkData;
         }
 
-        public FileInfo? Source => _hardLinkInfo.Source;
+        public FileData? Source => _hardLinkData.Source;
 
-        public List<FileInfo> Targets => _hardLinkInfo.Targets;
+        public List<FileData> Targets => _hardLinkData.Targets;
 
-        public FileInfo? Guess { get; set; }
+        public FileData? Guess { get; set; }
 
         public bool Guessing { get; set; }
 
-        public bool CanGuess => _hardLinkInfo.Targets.Count == 0 && Guess == null;
+        public bool CanGuess => _hardLinkData.Targets.Count == 0 && Guess == null;
 
         public bool CanLink => Guess != null;
 
-        public IEnumerable<FileInfo> AllTargets
+        public IEnumerable<FileData> AllTargets
         {
             get
             {

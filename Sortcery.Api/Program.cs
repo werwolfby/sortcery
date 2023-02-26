@@ -1,7 +1,5 @@
 using Microsoft.Extensions.Options;
 using Sortcery.Api;
-using Sortcery.Api.Services;
-using Sortcery.Api.Services.Contracts;
 using Sortcery.Engine;
 using Sortcery.Engine.Contracts;
 
@@ -22,13 +20,21 @@ builder.Services
     .Bind(builder.Configuration.GetSection(FoldersOptions.Folders))
     .Validate(o => o.IsValid, "Folders options are not valid")
     .ValidateOnStart();
-builder.Services.AddSingleton<IFoldersService, FoldersService>();
+builder.Services.AddSingleton<IFoldersProvider, FoldersProvider>(sp =>
+{
+    var options = sp.GetService<IOptions<FoldersOptions>>();
+    return new FoldersProvider(
+        new FolderData(FolderType.Source, options!.Value.Source),
+        new FolderData(FolderType.Movies, options!.Value.Movies),
+        new FolderData(FolderType.Shows, options!.Value.Series));
+});
 builder.Services.AddSingleton<IGuessItApi, GuessItApi>();
 builder.Services.AddHttpClient<IGuessItApi, GuessItApi>((sp, client) =>
 {
     var options = sp.GetService<IOptions<GuessItOptions>>();
     client.BaseAddress = new Uri(options!.Value.Url);
 });
+builder.Services.AddSingleton<ILinker, Linker>();
 
 var app = builder.Build();
 

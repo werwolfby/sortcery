@@ -1,6 +1,5 @@
 using System.Collections;
 using Sortcery.Engine.Contracts;
-using FileInfo = Sortcery.Engine.Contracts.FileInfo;
 
 namespace Sortcery.Engine.UnitTests;
 
@@ -8,11 +7,11 @@ public class Tests
 {
     public class FindLinksTestCase : IEnumerable
     {
-        public (int inode, string filePath)[] SourceFiles { get; set; }
+        public (int inode, string filePath)[]? SourceFiles { get; set; }
 
-        public (int inode, string filePath)[] TargetFiles { get; set; }
+        public (int inode, string filePath)[]? TargetFiles { get; set; }
 
-        public (string? source, string[] targets)[] ExpectedLinks { get; set; }
+        public (string? source, string[] targets)[]? ExpectedLinks { get; set; }
 
         public IEnumerator GetEnumerator()
         {
@@ -29,17 +28,17 @@ public class Tests
         (string? source, string[] targets)[] expectedLinks)
     {
         // Arrange
-        var linker = new Linker();
-        var sourceDir = new FolderInfo("D:\\Downloads\\Sources");
-        var targetDir = new FolderInfo("D:\\Video\\Movies");
+        var linker = new Linker(null, null);
+        var sourceDir = new FolderData(FolderType.Source, "/Downloads/Completed");
+        var targetDir = new FolderData(FolderType.Movies, "/Video/Movies");
         var source = sourceFiles
             .ToDictionary(
                 x => NewHardLinkId(x.inode),
-                x => new FileInfo(sourceDir, x.filePath));
-        var target1 = (IReadOnlyDictionary<HardLinkId, FileInfo>)targetFiles
+                x => new FileData(sourceDir, x.filePath));
+        var target1 = (IReadOnlyDictionary<HardLinkId, FileData>)targetFiles
             .ToDictionary(
                 x => NewHardLinkId(x.inode),
-                x => new FileInfo(targetDir, x.filePath));
+                x => new FileData(targetDir, x.filePath));
 
         // Act
         var links = linker.FindLinks(source, new[] {(targetDir, target1)});
@@ -50,14 +49,14 @@ public class Tests
         {
             if (s != null)
             {
-                var link = links.FirstOrDefault(x => x.Source?.RelativePath == s);
-                Assert.That(link.Source?.RelativePath, Is.EqualTo(s));
-                Assert.That(link.Targets.Select(x => x.RelativePath), Is.EquivalentTo(targets));
+                var link = links.FirstOrDefault(x => x.Source?.RelativeName == s);
+                Assert.That(link.Source?.RelativeName, Is.EqualTo(s));
+                Assert.That(link.Targets.Select(x => x.RelativeName), Is.EquivalentTo(targets));
             }
             else
             {
-                var link = links.FirstOrDefault(x => x.Targets?.Any(t => targets.Contains(t.RelativePath)) == true);
-                Assert.That(link.Targets.Select(x => x.RelativePath), Is.EquivalentTo(targets));
+                var link = links.FirstOrDefault(x => x.Targets?.Any(t => targets.Contains(t.RelativeName)) == true);
+                Assert.That(link.Targets.Select(x => x.RelativeName), Is.EquivalentTo(targets));
             }
         }
     }

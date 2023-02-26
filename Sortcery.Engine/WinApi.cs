@@ -4,9 +4,9 @@ using System.Runtime.InteropServices;
 namespace Sortcery.Engine;
 
 #if _WINDOWS
-public class WinApi
+internal class WinApi
 {
-    public static HardLinkId FromFileInfo(FileInfo fileInfo)
+    internal static HardLinkId FromFileInfo(FileInfo fileInfo)
     {
         var fileHandle = CreateFile(fileInfo.FullName, FileAccess.Read, FileShare.Read, IntPtr.Zero, FileMode.Open, FileAttributes.Normal, IntPtr.Zero);
         if (fileHandle == INVALID_HANDLE_VALUE)

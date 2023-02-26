@@ -1,6 +1,6 @@
 @if (File != null)
-{   
-    <span class="folder-path text-primary">@File.Dir/</span><span>@File.RelativePath</span>
+{
+    <span class="folder-path text-primary">@File.Dir/</span><span>@File.RelativeName</span>
 }
 else
 {
@@ -9,5 +9,5 @@ else
 
 @code {
     [Parameter]
-    public Api.Contracts.Models.FileInfo File { get; set; }
+    public Api.Contracts.Models.FileData File { get; set; }
 }
