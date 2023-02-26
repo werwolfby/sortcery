@@ -20,6 +20,8 @@ namespace Sortcery.Web.Models
 
         public bool Guessing { get; set; }
 
+        public bool Editing { get; set; }
+
         public bool CanGuess => _hardLinkData.Targets.Count == 0 && Guess == null;
 
         public bool CanLink => Guess != null;

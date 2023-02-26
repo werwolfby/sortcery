@@ -1,0 +1,53 @@
+﻿@using Sortcery.Api.Contracts.Models
+<di class="grid">
+    <button type="button" class="btn btn-secondary btn-xs g-col-1" @onclick="_ => Cancel()"><span>Cancel</span></button>
+    <div class="input-group input-group-sm g-col-10">
+        <select class="form-select form-select-sm" aria-label=".form-select-sm example" @bind="Dir">
+            @foreach (var folder in Folders)
+            {
+                <option value="@folder">@folder</option>
+            }
+        </select>
+        <input type="text" class="form-control form-control-sm" placeholder="Path" @bind="@Path" />
+        <span class="input-group-text">/</span>
+        <input type="text" class="form-control form-control-sm" placeholder="Name" @bind="@Name" />
+    </div>
+    <button type="button" class="btn btn-secondary btn-xs g-col-1" @onclick="_ => Save()"><span>Save</span></button>
+</di>
+
+@code {
+    public string[] Folders { get; set; } = { "Movies", "Shows" };
+
+    [Parameter]
+    public FileData File { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnComplete { get; set; }
+
+    public string Dir { get; set; }
+
+    public string Path { get; set; }
+
+    public string Name { get; set; }
+
+    private void Cancel()
+    {
+        OnComplete.InvokeAsync(false);
+    }
+
+    private void Save()
+    {
+        File.Dir = Dir;
+        File.Path = Path;
+        File.Name = Name;
+
+        OnComplete.InvokeAsync(true);
+    }
+
+    protected override void OnParametersSet()
+    {
+        Dir = File.Dir;
+        Path = File.Path;
+        Name = File.Name;
+    }
+}

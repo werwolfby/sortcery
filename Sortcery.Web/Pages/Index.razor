@@ -31,23 +31,30 @@ else
         </td>
         <td>
           <div>
-          @if (link.CanLink)
-          {
-            <button type="button" class="btn btn-secondary btn-xs"><span>Edit</span></button>
-            <button type="button" class="btn btn-secondary btn-xs" @onclick="e => CancelGuess(link)"><span>Cancel</span></button>
-          }
-          @foreach(var target in link.AllTargets)
-          {
-            <FileInfo File="target"></FileInfo>
-          }
-          @if (link.CanGuess)
-          {
-            <button type="button" class="btn btn-primary btn-xs" disabled="@link.Guessing" @onclick="async e => await GuessIt(link)">Guess It</button>
-          }
-          @if (link.CanLink)
-          {
-            <button type="button" class="btn btn-success btn-xs" @onclick="async e => await Link(link)">Link It</button>
-          }
+            @if (link.Editing)
+            {
+              <EditFileInfo File="link.Guess" OnComplete="_ => link.Editing = false"></EditFileInfo>
+            }
+            else
+            {
+              @if (link.CanLink)
+              {
+                <button type="button" class="btn btn-secondary btn-xs" @onclick="e => Edit(link)"><span>Edit</span></button>
+                <button type="button" class="btn btn-secondary btn-xs" @onclick="e => CancelGuess(link)"><span>Cancel</span></button>
+              }
+              @foreach (var target in link.AllTargets)
+              {
+                <FileInfo File="target"></FileInfo>
+              }
+              @if (link.CanGuess)
+              {
+                <button type="button" class="btn btn-primary btn-xs" disabled="@link.Guessing" @onclick="async e => await GuessIt(link)">Guess It</button>
+              }
+              @if (link.CanLink)
+              {
+                <button type="button" class="btn btn-success btn-xs" @onclick="async e => await Link(link)">Link It</button>
+              }
+            }
           </div>
         </td>
       </tr>
@@ -65,6 +72,11 @@ else
     var query = Path.Join("api/guess", link.Source!.FullName);
     link.Guess = await Http.GetFromJsonAsync<FileData>(query);
     link.Guessing = false;
+  }
+
+  private void Edit(HardLinkViewModel link)
+  {
+    link.Editing = true;
   }
 
   private void CancelGuess(HardLinkViewModel link)
