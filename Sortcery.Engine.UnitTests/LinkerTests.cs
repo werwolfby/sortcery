@@ -49,14 +49,14 @@ public class Tests
         {
             if (s != null)
             {
-                var link = links.FirstOrDefault(x => x.Source?.RelativePath == s);
-                Assert.That(link.Source?.RelativePath, Is.EqualTo(s));
-                Assert.That(link.Targets.Select(x => x.RelativePath), Is.EquivalentTo(targets));
+                var link = links.FirstOrDefault(x => x.Source?.RelativeName == s);
+                Assert.That(link.Source?.RelativeName, Is.EqualTo(s));
+                Assert.That(link.Targets.Select(x => x.RelativeName), Is.EquivalentTo(targets));
             }
             else
             {
-                var link = links.FirstOrDefault(x => x.Targets?.Any(t => targets.Contains(t.RelativePath)) == true);
-                Assert.That(link.Targets.Select(x => x.RelativePath), Is.EquivalentTo(targets));
+                var link = links.FirstOrDefault(x => x.Targets?.Any(t => targets.Contains(t.RelativeName)) == true);
+                Assert.That(link.Targets.Select(x => x.RelativeName), Is.EquivalentTo(targets));
             }
         }
     }

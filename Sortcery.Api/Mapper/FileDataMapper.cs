@@ -9,7 +9,7 @@ public static class FileDataMapper
         return new()
         {
             Dir = fileData.Dir.Name,
-            Path = fileData.Path.ToArray(),
+            Path = fileData.Path,
             Name = fileData.Name
         };
     }
