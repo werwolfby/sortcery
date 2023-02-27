@@ -1,0 +1,62 @@
+﻿@using Sortcery.Api.Contracts.Models
+<div class="row g-2">
+    <div class="col-auto">
+        <button type="button" class="btn btn-primary btn-sm" @onclick="_ => Cancel()"><i class="bi bi-x"></i> Cancel</button>
+    </div>
+    <div class="col px-0">
+        <div class="input-group input-group-sm">
+            <select class="form-select-sm" @bind="Dir">
+                @foreach (var folder in Folders)
+                {
+                    <option value="@folder">@folder</option>
+                }
+            </select>
+            <span class="input-group-text">/</span>
+            <input type="text" class="form-control" placeholder="Path" @bind="@Path">
+            <span class="input-group-text">/</span>
+            <input type="text" class="form-control" placeholder="Name" @bind="@Name">
+        </div>
+    </div>
+    <div class="col-auto">
+        <button type="button" class="btn btn-success btn-sm" @onclick="_ => Save()"><i class="bi bi-save"></i> Save</button>
+    </div>
+</div>
+
+@code {
+
+    public string[] Folders { get; set; } = { "Movies", "Shows" };
+
+    [Parameter]
+    public FileData File { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnComplete { get; set; }
+
+    public string Dir { get; set; }
+
+    public string Path { get; set; }
+
+    public string Name { get; set; }
+
+    private void Cancel()
+    {
+        OnComplete.InvokeAsync(false);
+    }
+
+    private void Save()
+    {
+        File.Dir = Dir;
+        File.Path = Path;
+        File.Name = Name;
+
+        OnComplete.InvokeAsync(true);
+    }
+
+    protected override void OnParametersSet()
+    {
+        Dir = File.Dir;
+        Path = File.Path;
+        Name = File.Name;
+    }
+
+}

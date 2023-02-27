@@ -1,0 +1,48 @@
+﻿@using Sortcery.Api.Contracts.Models
+
+<div class="row align-items-center g-2">
+    <div class="col-auto">
+        <button type="button" class="btn btn-warning btn-sm" @onclick="async _ => await Edit()" disabled="@Linking"><i class="bi bi-pencil"></i> Edit</button>
+        <button type="button" class="btn btn-primary btn-sm" @onclick="async _ => await Cancel()" disabled="@Linking"><i class="bi bi-x"></i> Cancel</button>
+    </div>
+    <div class="col">
+        <FileInfo File="File"></FileInfo>
+    </div>
+    <div class="col-auto">
+        <button type="button" class="btn btn-success btn-sm" @onclick="async _ => await Link()" disabled="@Linking"><i class="bi bi-link"></i> Link</button>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public FileData File { get; set; }
+
+    [Parameter]
+    public bool Linking { get; set; }
+
+    [Parameter]
+    public EventCallback<FileData> OnEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<FileData> OnCancel { get; set; }
+
+    [Parameter]
+    public EventCallback<FileData> OnLink { get; set; }
+
+    private async Task Edit()
+    {
+        await OnEdit.InvokeAsync(File);
+    }
+
+    private async Task Cancel()
+    {
+        await OnCancel.InvokeAsync(File);
+    }
+
+    private async Task Link()
+    {
+        await OnLink.InvokeAsync(File);
+    }
+
+}

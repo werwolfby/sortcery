@@ -1,89 +1,111 @@
 ﻿@page "/"
 @using Sortcery.Api.Contracts.Models
-@using Microsoft.AspNetCore.WebUtilities
 @using Sortcery.Web.Models
 @using System.IO
 @inject HttpClient Http
 
 @if (_links == null)
 {
-    <p><em>Loading...</em></p>
+    <p>
+        <h1>Loading...</h1>
+    </p>
 }
 else
 {
-  <table class="table table-sm table-hover">
-    <thead>
-    <tr>
-      <th scope="col" style="width: 50%">Source</th>
-      <th scope="col" style="width: 50%">
-        <span>Destination</span>
-        <button type="button" class="btn btn-primary btn-xs">Guess All</button>
-        <button type="button" class="btn btn-success btn-xs">Link All</button>
-      </th>
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (var link in _links)
-    {
-      <tr>
-        <td>
-          <FileInfo File="link.Source"></FileInfo>
-        </td>
-        <td>
-          <div>
-          @if (link.CanLink)
-          {
-            <button type="button" class="btn btn-secondary btn-xs"><span>Edit</span></button>
-            <button type="button" class="btn btn-secondary btn-xs" @onclick="e => CancelGuess(link)"><span>Cancel</span></button>
-          }
-          @foreach(var target in link.AllTargets)
-          {
-            <FileInfo File="target"></FileInfo>
-          }
-          @if (link.CanGuess)
-          {
-            <button type="button" class="btn btn-primary btn-xs" disabled="@link.Guessing" @onclick="async e => await GuessIt(link)">Guess It</button>
-          }
-          @if (link.CanLink)
-          {
-            <button type="button" class="btn btn-success btn-xs" @onclick="async e => await Link(link)">Link It</button>
-          }
-          </div>
-        </td>
-      </tr>
-    }
-    </tbody>
-  </table>
+    <table class="table table-striped align-middle">
+        <thead>
+        <tr>
+            <th scope="col" class="col-4">Source</th>
+            <th scope="col" class="col-8">Destination</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var link in _links)
+        {
+            <tr>
+                <td>
+                    <FileInfo File="link.Source"></FileInfo>
+                </td>
+                <td>
+                    @if (link.Editing)
+                    {
+                        <EditFileData File="link.Guess" OnComplete="_ => link.Editing = false"></EditFileData>
+                    }
+                    else if (link.Guess != null)
+                    {
+                        <GuessedFileData File="link.Guess"
+                                         Linking="link.Linking"
+                                         OnEdit="() => Edit(link)"
+                                         OnCancel="() => CancelGuess(link)"
+                                         OnLink="async () => await Link(link)">
+                        </GuessedFileData>
+                    }
+                    else if (link.Targets.Count > 0)
+                    {
+                        @foreach (var target in link.AllTargets)
+                        {
+                            <FileInfo File="target"></FileInfo>
+                        }
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-success btn-sm" disabled="@link.Guessing" @onclick="async e => await GuessIt(link)"><i class="bi bi-magic"></i> Guess It</button>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
 }
 
 @code {
-  private HardLinkViewModel[]? _links;
+    private HardLinkViewModel[]? _links;
 
-  private async Task GuessIt(HardLinkViewModel link)
-  {
-    link.Guessing = true;
-    var query = Path.Join("api/guess", link.Source!.FullName);
-    link.Guess = await Http.GetFromJsonAsync<FileData>(query);
-    link.Guessing = false;
-  }
+    private async Task GuessIt(HardLinkViewModel link)
+    {
+        link.Guessing = true;
+        try
+        {
+            var query = Path.Join("api/guess", link.Source!.FullName);
+            link.Guess = await Http.GetFromJsonAsync<FileData>(query);
+        }
+        finally
+        {
+            link.Guessing = false;
+        }
+    }
 
-  private void CancelGuess(HardLinkViewModel link)
-  {
-    link.Guess = null;
-  }
+    private void Edit(HardLinkViewModel link)
+    {
+        link.Editing = true;
+    }
 
-  private async Task Link(HardLinkViewModel link)
-  {
-    var query = Path.Join("api/links", link.Source!.FullName);
-    using var linkResponse = await Http.PostAsJsonAsync(query, link.Guess!);
-    linkResponse.EnsureSuccessStatusCode();
-    link.Targets.Add(link.Guess!);
-    link.Guess = null;
-  }
+    private void CancelGuess(HardLinkViewModel link)
+    {
+        link.Guess = null;
+    }
 
-  protected override async Task OnInitializedAsync()
-  {
-    var links = await Http.GetFromJsonAsync<HardLinkData[]>("api/links");
-    _links = links.Select(e => new HardLinkViewModel(e)).ToArray();
-  }
+    private async Task Link(HardLinkViewModel link)
+    {
+        link.Linking = true;
+        try
+        {
+            var query = Path.Join("api/links", link.Source!.FullName);
+            using var linkResponse = await Http.PostAsJsonAsync(query, link.Guess!);
+            linkResponse.EnsureSuccessStatusCode();
+            link.Targets.Add(link.Guess!);
+            link.Guess = null;
+        }
+        finally
+        {
+            link.Linking = false;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var links = await Http.GetFromJsonAsync<HardLinkData[]>("api/links");
+        _links = links.Select(e => new HardLinkViewModel(e)).ToArray();
+    }
+
 }
