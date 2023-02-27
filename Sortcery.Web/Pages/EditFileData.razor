@@ -1,21 +1,29 @@
 ﻿@using Sortcery.Api.Contracts.Models
-<di class="grid">
-    <button type="button" class="btn btn-secondary btn-xs g-col-1" @onclick="_ => Cancel()"><span>Cancel</span></button>
-    <div class="input-group input-group-sm g-col-10">
-        <select class="form-select form-select-sm" aria-label=".form-select-sm example" @bind="Dir">
-            @foreach (var folder in Folders)
-            {
-                <option value="@folder">@folder</option>
-            }
-        </select>
-        <input type="text" class="form-control form-control-sm" placeholder="Path" @bind="@Path" />
-        <span class="input-group-text">/</span>
-        <input type="text" class="form-control form-control-sm" placeholder="Name" @bind="@Name" />
+<div class="row g-2">
+    <div class="col-auto">
+        <button type="button" class="btn btn-primary btn-sm" @onclick="_ => Cancel()"><i class="bi bi-x"></i> Cancel</button>
     </div>
-    <button type="button" class="btn btn-secondary btn-xs g-col-1" @onclick="_ => Save()"><span>Save</span></button>
-</di>
+    <div class="col px-0">
+        <div class="input-group input-group-sm">
+            <select class="form-select-sm" @bind="Dir">
+                @foreach (var folder in Folders)
+                {
+                    <option value="@folder">@folder</option>
+                }
+            </select>
+            <span class="input-group-text">/</span>
+            <input type="text" class="form-control" placeholder="Path" @bind="@Path">
+            <span class="input-group-text">/</span>
+            <input type="text" class="form-control" placeholder="Name" @bind="@Name">
+        </div>
+    </div>
+    <div class="col-auto">
+        <button type="button" class="btn btn-success btn-sm" @onclick="_ => Save()"><i class="bi bi-save"></i> Save</button>
+    </div>
+</div>
 
 @code {
+
     public string[] Folders { get; set; } = { "Movies", "Shows" };
 
     [Parameter]
@@ -50,4 +58,5 @@
         Path = File.Path;
         Name = File.Name;
     }
+
 }
