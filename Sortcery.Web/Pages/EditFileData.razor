@@ -1,4 +1,7 @@
 ﻿@using Sortcery.Api.Contracts.Models
+@using Sortcery.Web.Services.Contracts
+@inject IFoldersService FoldersService
+
 <div class="row g-2">
     <div class="col-auto">
         <button type="button" class="btn btn-primary btn-sm" @onclick="_ => Cancel()"><i class="bi bi-x"></i> Cancel</button>
@@ -6,9 +9,9 @@
     <div class="col px-0">
         <div class="input-group input-group-sm">
             <select class="form-select-sm" @bind="Dir">
-                @foreach (var folder in Folders)
+                @foreach (var folder in FoldersService.DestinationFolders)
                 {
-                    <option value="@folder">@folder</option>
+                    <option value="@folder.Name">@folder.Name</option>
                 }
             </select>
             <span class="input-group-text">/</span>
@@ -23,8 +26,6 @@
 </div>
 
 @code {
-
-    public string[] Folders { get; set; } = { "Movies", "Shows" };
 
     [Parameter]
     public FileData File { get; set; }
