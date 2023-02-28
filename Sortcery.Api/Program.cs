@@ -51,6 +51,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
+app.UseWebAssemblyDebugging();
 app.UseStaticFiles();
 
 app.UseAuthorization();
