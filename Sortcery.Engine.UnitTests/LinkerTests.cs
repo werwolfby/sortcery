@@ -29,8 +29,8 @@ public class Tests
     {
         // Arrange
         var linker = new Linker(null, null);
-        var sourceDir = new FolderData(FolderType.Source, "/Downloads/Completed");
-        var targetDir = new FolderData(FolderType.Movies, "/Video/Movies");
+        var sourceDir = new FolderData("/Downloads/Completed");
+        var targetDir = new FolderData("/Video/Movies");
         var source = sourceFiles
             .ToDictionary(
                 x => NewHardLinkId(x.inode),

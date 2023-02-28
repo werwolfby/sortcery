@@ -23,7 +23,7 @@ public class FoldersController : ControllerBase
         {
             DirectorySeparator = Path.DirectorySeparatorChar.ToString(),
             Source = _foldersProvider.Source.ToApi(),
-            DestinationFolders = _foldersProvider.DestinationFolders.Select(x => x.ToApi()).ToArray()
+            DestinationFolders = _foldersProvider.DestinationFolders.Values.Select(x => x.ToApi()).ToArray()
         });
     }
 }

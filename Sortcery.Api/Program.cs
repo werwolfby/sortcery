@@ -24,9 +24,9 @@ builder.Services.AddSingleton<IFoldersProvider, FoldersProvider>(sp =>
 {
     var options = sp.GetService<IOptions<FoldersOptions>>();
     return new FoldersProvider(
-        new FolderData(FolderType.Source, options!.Value.Source),
-        new FolderData(FolderType.Movies, options!.Value.Movies),
-        new FolderData(FolderType.Shows, options!.Value.Series));
+        new FolderData(options!.Value.Source),
+        (FolderType.Movies, new FolderData(options!.Value.Movies)),
+        (FolderType.Shows, new FolderData(options!.Value.Series)));
 });
 builder.Services.AddSingleton<IGuessItApi, GuessItApi>();
 builder.Services.AddHttpClient<IGuessItApi, GuessItApi>((sp, client) =>

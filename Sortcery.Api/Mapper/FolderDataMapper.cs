@@ -10,7 +10,6 @@ public static class FolderDataMapper
         {
             Name = folderData.Name,
             Path = folderData.Path,
-            Type = folderData.Type.ToString()
         };
     }
 }

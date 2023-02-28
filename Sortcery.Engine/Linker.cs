@@ -19,7 +19,7 @@ public class Linker : ILinker
     public void Update()
     {
         var sourceFiles = _foldersProvider.Source.Traverse();
-        var destinationFolderFiles = _foldersProvider.DestinationFolders
+        var destinationFolderFiles = _foldersProvider.DestinationFolders.Values
             .Select(x => (Folder: x, Files: x.Traverse()))
             .ToList();
 
