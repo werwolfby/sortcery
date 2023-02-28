@@ -34,11 +34,11 @@ public class Tests
         var source = sourceFiles
             .ToDictionary(
                 x => NewHardLinkId(x.inode),
-                x => new FileData(sourceDir, x.filePath));
+                x => new FileData(sourceDir, NewHardLinkId(x.inode), x.filePath));
         var target1 = (IReadOnlyDictionary<HardLinkId, FileData>)targetFiles
             .ToDictionary(
                 x => NewHardLinkId(x.inode),
-                x => new FileData(targetDir, x.filePath));
+                x => new FileData(targetDir, NewHardLinkId(x.inode), x.filePath));
 
         // Act
         var links = linker.FindLinks(source, new[] {(targetDir, target1)});
@@ -49,14 +49,14 @@ public class Tests
         {
             if (s != null)
             {
-                var link = links.FirstOrDefault(x => x.Source?.RelativeName == s);
-                Assert.That(link.Source?.RelativeName, Is.EqualTo(s));
-                Assert.That(link.Targets.Select(x => x.RelativeName), Is.EquivalentTo(targets));
+                var link = links.FirstOrDefault(x => x.Source?.Name == s);
+                Assert.That(link.Source?.Name, Is.EqualTo(s));
+                Assert.That(link.Targets.Select(x => x.Name), Is.EquivalentTo(targets));
             }
             else
             {
-                var link = links.FirstOrDefault(x => x.Targets?.Any(t => targets.Contains(t.RelativeName)) == true);
-                Assert.That(link.Targets.Select(x => x.RelativeName), Is.EquivalentTo(targets));
+                var link = links.FirstOrDefault(x => x.Targets?.Any(t => targets.Contains(t.Name)) == true);
+                Assert.That(link.Targets.Select(x => x.Name), Is.EquivalentTo(targets));
             }
         }
     }

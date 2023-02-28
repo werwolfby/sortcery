@@ -37,8 +37,8 @@ public class LinksController : ControllerBase
             return BadRequest($"Unknown destination folder: {body.Dir}");
         }
 
-        var sourceFile = new FileData(_foldersProvider.Source, relativePath);
-        var destinationFile = new FileData(destinationFolder, body.Path, body.Name);
+        var sourceFile = new FileData(_foldersProvider.Source, HardLinkId.Empty, relativePath);
+        var destinationFile = new FileData(destinationFolder, HardLinkId.Empty, body.Name);
 
         _linker.Link(sourceFile, destinationFile);
 

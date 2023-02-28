@@ -8,8 +8,8 @@ public static class FileDataMapper
     {
         return new()
         {
-            Dir = fileData.Dir.Name,
-            Path = fileData.Path,
+            Dir = fileData.Dir.Root.Name,
+            Path = fileData.Dir.RelativePath,
             Name = fileData.Name
         };
     }

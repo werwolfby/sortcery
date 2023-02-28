@@ -53,9 +53,8 @@ internal static class FolderDataExtensions
 
     private static (FileData, HardLinkId) FromSortceryFileInfo(FolderData dir, SortceryFileInfo fileInfo)
     {
-        var relativePath = fileInfo.FullName[(dir.FullName.Length + 1)..];
         var hardLinkId = FromSortceryFileInfo(fileInfo);
-        return (new FileData(dir, relativePath), hardLinkId);
+        return (new FileData(dir, hardLinkId, fileInfo.Name), hardLinkId);
     }
 
     private static HardLinkId FromSortceryFileInfo(SortceryFileInfo fileInfo)

@@ -25,7 +25,7 @@ public class GuessController : ControllerBase
             return NotFound($"Unknown source folder: {dir}");
         }
 
-        var fileData = await _linker.GuessAsync(new FileData(_foldersProvider.Source, filePath));
+        var fileData = await _linker.GuessAsync(new FileData(_foldersProvider.Source, HardLinkId.Empty, filePath));
 
         return Ok(fileData.ToFileData());
     }

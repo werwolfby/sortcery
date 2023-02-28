@@ -96,7 +96,7 @@ public class Linker : ILinker
             throw new InvalidOperationException("Unknown destination folder: Movies");
         }
 
-        return new FileData(destinationFolder, filename);
+        return new FileData(destinationFolder, HardLinkId.Empty, filename);
     }
 
     private FileData GuessEpisode(Guess guess, string filename)
@@ -106,6 +106,9 @@ public class Linker : ILinker
             throw new InvalidOperationException("Unknown destination folder: Series");
         }
 
-        return new FileData(destinationFolder, Path.Combine(guess.Title, $"Season {guess.Season}", filename));
+        var showFolder = destinationFolder.GetOrAddFolder(guess.Title);
+        var seasonFolder = showFolder.GetOrAddFolder($"Season {guess.Season}");
+
+        return new FileData(seasonFolder, HardLinkId.Empty, filename);
     }
 }
