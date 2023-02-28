@@ -19,6 +19,8 @@ public class Linker : ILinker
 
     public void Update()
     {
+        _foldersProvider.Update();
+
         var sourceFiles = _foldersProvider.Source.GetAllFilesRecursively().ToDictionary(x => x.HardLinkId);
         var destinationFolderFiles = _foldersProvider.DestinationFolders.Values
             .Select(x => (Folder: x, Files: (IReadOnlyDictionary<HardLinkId, FileData>)x.GetAllFilesRecursively().ToDictionary(x => x.HardLinkId).AsReadOnly()))

@@ -8,6 +8,8 @@ public interface IFoldersProvider
 
     IReadOnlyDictionary<FolderType, FolderData> DestinationFolders { get; }
 
+    void Update();
+
     bool TryGetDestinationFolder(string dir, [MaybeNullWhen(false)]out FolderData folderData)
     {
         folderData = DestinationFolders.Values.FirstOrDefault(x => x.Name == dir);

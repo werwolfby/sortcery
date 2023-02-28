@@ -2,5 +2,5 @@
 
 public interface ITraverser
 {
-    FolderData Traverse(string fullName);
+    void Traverse(FolderData folder);
 }

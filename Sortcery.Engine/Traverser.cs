@@ -21,20 +21,37 @@ public class Traverser : ITraverser
         return folderData;
     }
 
-    private static void Traverse(FolderData folder)
+    public void Traverse(FolderData folder)
     {
+        var existingFolders = new HashSet<string>(folder.Folders.Select(x => x.Name));
+        var existingFiles = new HashSet<string>(folder.Files.Select(x => x.Name));
+
         foreach (var entry in new SortceryDirectoryInfo(folder.FullName).GetFileSystemEntries())
         {
             switch (entry)
             {
                 case SortceryDirectoryInfo subDir:
-                    var subFolder = folder.AddFolder(subDir.FullName);
+                    var subFolder = folder.GetOrAddFolder(subDir.Name);
+                    existingFolders.Remove(subFolder.Name);
                     Traverse(subFolder);
                     break;
                 case SortceryFileInfo fileInfo:
-                    folder.AddFile(fileInfo.Name, fileInfo.GetHardLinkId());
+                    var hardLinkId = fileInfo.GetHardLinkId();
+                    var file = folder.GetOrAddFile(fileInfo.Name, hardLinkId);
+                    file.HardLinkId = hardLinkId;
+                    existingFiles.Remove(fileInfo.Name);
                     break;
             }
+        }
+
+        foreach (var folderToRemove in existingFolders)
+        {
+            folder.RemoveFolder(folderToRemove);
+        }
+
+        foreach (var fileToRemove in existingFiles)
+        {
+            folder.RemoveFile(fileToRemove);
         }
     }
 }

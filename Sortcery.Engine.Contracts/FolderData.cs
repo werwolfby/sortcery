@@ -53,11 +53,36 @@ public class FolderData
         _folders.FirstOrDefault(x => x.Name == name)
         ?? _folders.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
 
+    public void RemoveFolder(string name)
+    {
+        var folder = GetFolder(name);
+        if (folder == null)
+            throw new ArgumentException($"Folder '{name}' not found.", nameof(name));
+
+        _folders.Remove(folder);
+    }
+
     public FileData AddFile(string name, HardLinkId hardLinkId)
     {
         var fileData = new FileData(this, hardLinkId, name);
         _files.Add(fileData);
         return fileData;
+    }
+
+    public FileData GetOrAddFile(string name, HardLinkId hardLinkId) =>
+        GetFile(name) ?? AddFile(name, hardLinkId);
+
+    public FileData? GetFile(string name) =>
+        _files.FirstOrDefault(x => x.Name == name)
+        ?? _files.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
+
+    public void RemoveFile(string name)
+    {
+        var file = GetFile(name);
+        if (file == null)
+            throw new ArgumentException($"File '{name}' not found.", nameof(name));
+
+        _files.Remove(file);
     }
 
     public FileData? FindFile(string[] filePath)

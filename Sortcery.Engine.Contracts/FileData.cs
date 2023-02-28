@@ -11,7 +11,7 @@ public class FileData
 
     public FolderData Dir { get; }
 
-    public HardLinkId HardLinkId { get; }
+    public HardLinkId HardLinkId { get; set; }
 
     public string Name { get; }
 
