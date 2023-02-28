@@ -11,8 +11,5 @@ public class FileData
     public string Name { get; set; }
 
     [JsonIgnore]
-    public string RelativeName => System.IO.Path.Join(Path, Name);
-
-    [JsonIgnore]
-    public string FullName => System.IO.Path.Join(Dir, RelativeName);
+    public string RelativeName => Path + Name;
 }

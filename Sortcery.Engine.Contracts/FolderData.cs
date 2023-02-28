@@ -46,15 +46,34 @@ public class FolderData
     }
 
     public FolderData GetOrAddFolder(string name) =>
-        _folders.FirstOrDefault(x => x.Name == name)
-        ?? _folders.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase))
+        GetFolder(name)
         ?? AddFolder(System.IO.Path.Combine(FullName, name));
+
+    public FolderData? GetFolder(string name) =>
+        _folders.FirstOrDefault(x => x.Name == name)
+        ?? _folders.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
 
     public FileData AddFile(string name, HardLinkId hardLinkId)
     {
         var fileData = new FileData(this, hardLinkId, name);
         _files.Add(fileData);
         return fileData;
+    }
+
+    public FileData? FindFile(string[] filePath)
+    {
+        if (filePath.Length == 0)
+            throw new ArgumentException("File path must not be empty.", nameof(filePath));
+
+        var folder = this;
+        for (var i = 0; i < filePath.Length - 1; i++)
+        {
+            folder = folder.GetFolder(filePath[i]);
+            if (folder == null)
+                return null;
+        }
+
+        return folder.Files.FirstOrDefault(x => x.Name == filePath[^1]);
     }
 
     public IEnumerable<FileData> GetAllFilesRecursively()
