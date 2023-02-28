@@ -1,6 +1,9 @@
+@using Sortcery.Web.Services.Contracts
+@inject IFoldersService FoldersService
+
 @if (File != null)
 {
-    <span class="folder-path text-primary">@File.Dir/</span><span>@File.RelativeName</span>
+    <span class="folder-path text-primary">@(File.Dir)@FoldersService.DirectorySeparator</span><span>@(RelativePath)</span>
 }
 else
 {
@@ -10,4 +13,9 @@ else
 @code {
     [Parameter]
     public Api.Contracts.Models.FileData? File { get; set; }
+
+    public string? RelativePath =>
+        !string.IsNullOrEmpty(File?.Path)
+            ? File?.Path + FoldersService.DirectorySeparator + File?.Name
+            : File?.Name;
 }
