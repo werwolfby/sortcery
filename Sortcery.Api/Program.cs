@@ -20,13 +20,16 @@ builder.Services
     .Bind(builder.Configuration.GetSection(FoldersOptions.Folders))
     .Validate(o => o.IsValid, "Folders options are not valid")
     .ValidateOnStart();
+builder.Services.AddSingleton<ITraverser, Traverser>();
 builder.Services.AddSingleton<IFoldersProvider, FoldersProvider>(sp =>
 {
-    var options = sp.GetService<IOptions<FoldersOptions>>();
+    var options = sp.GetRequiredService<IOptions<FoldersOptions>>();
+    var traverser = sp.GetRequiredService<ITraverser>();
     return new FoldersProvider(
-        new FolderData(options!.Value.Source),
-        (FolderType.Movies, new FolderData(options!.Value.Movies)),
-        (FolderType.Shows, new FolderData(options!.Value.Series)));
+        traverser,
+        options.Value.Source,
+        (FolderType.Movies, options.Value.Movies),
+        (FolderType.Shows, options.Value.Series));
 });
 builder.Services.AddSingleton<IGuessItApi, GuessItApi>();
 builder.Services.AddHttpClient<IGuessItApi, GuessItApi>((sp, client) =>

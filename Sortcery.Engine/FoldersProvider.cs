@@ -4,15 +4,12 @@ namespace Sortcery.Engine;
 
 public class FoldersProvider : IFoldersProvider
 {
-    public FoldersProvider(FolderData source, params (FolderType type, FolderData folder)[] destination) :
-        this(source, destination.ToDictionary(x => x.type, x => x.folder).AsReadOnly())
+    public FoldersProvider(ITraverser traverser, string source, params (FolderType type, string folder)[] destination)
     {
-    }
-
-    public FoldersProvider(FolderData source, IReadOnlyDictionary<FolderType, FolderData> destinationFolders)
-    {
-        Source = source;
-        DestinationFolders = destinationFolders;
+        Source = traverser.Traverse(source);
+        DestinationFolders = destination.ToDictionary(
+            x => x.type,
+            x => traverser.Traverse(x.folder));
     }
 
     public FolderData Source { get; }

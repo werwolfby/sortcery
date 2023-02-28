@@ -11,6 +11,7 @@ public class Linker : ILinker
     {
         _foldersProvider = foldersProvider;
         _guessItApi = guessItApi;
+
         Links = Array.Empty<HardLinkData>();
     }
 
@@ -18,9 +19,9 @@ public class Linker : ILinker
 
     public void Update()
     {
-        var sourceFiles = _foldersProvider.Source.Traverse();
+        var sourceFiles = _foldersProvider.Source.GetAllFilesRecursively().ToDictionary(x => x.HardLinkId);
         var destinationFolderFiles = _foldersProvider.DestinationFolders.Values
-            .Select(x => (Folder: x, Files: x.Traverse()))
+            .Select(x => (Folder: x, Files: (IReadOnlyDictionary<HardLinkId, FileData>)x.GetAllFilesRecursively().ToDictionary(x => x.HardLinkId).AsReadOnly()))
             .ToList();
 
         Links = FindLinks(sourceFiles, destinationFolderFiles);

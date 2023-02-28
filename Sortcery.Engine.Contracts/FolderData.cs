@@ -57,6 +57,18 @@ public class FolderData
         return fileData;
     }
 
+    public IEnumerable<FileData> GetAllFilesRecursively()
+    {
+        foreach (var folder in Folders)
+        {
+            foreach (var file in folder.GetAllFilesRecursively())
+                yield return file;
+        }
+
+        foreach (var file in Files)
+            yield return file;
+    }
+
     public void Deconstruct(out string path, out string name)
     {
         path = Path;
