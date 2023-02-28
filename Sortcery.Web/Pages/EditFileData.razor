@@ -14,9 +14,9 @@
                     <option value="@folder.Name">@folder.Name</option>
                 }
             </select>
-            <span class="input-group-text">/</span>
+            <span class="input-group-text">@FoldersService.DirectorySeparator</span>
             <input type="text" class="form-control" placeholder="Path" @bind="@Path">
-            <span class="input-group-text">/</span>
+            <span class="input-group-text">@FoldersService.DirectorySeparator</span>
             <input type="text" class="form-control" placeholder="Name" @bind="@Name">
         </div>
     </div>

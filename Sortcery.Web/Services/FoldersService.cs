@@ -13,6 +13,8 @@ public class FoldersService : IFoldersService
         _httpClient = httpClient;
     }
 
+    public string DirectorySeparator { get; private set; } = default!;
+
     public FolderData Source { get; private set; } = default!;
 
     public IReadOnlyList<FolderData> DestinationFolders { get; private set; } = Array.Empty<FolderData>();
@@ -22,6 +24,7 @@ public class FoldersService : IFoldersService
         var response = await _httpClient.GetAsync("api/folders");
         var settings = await response.Content.ReadFromJsonAsync<Folders>();
 
+        DirectorySeparator = settings.DirectorySeparator;
         Source = settings.Source;
         DestinationFolders = settings.DestinationFolders;
     }
