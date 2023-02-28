@@ -4,7 +4,16 @@
 @using System.IO
 @inject HttpClient Http
 
-@if (_links == null)
+<div class="container-fluid pt-3">
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" @bind="ShowOnlyNewFiles" id="showOnlyNewFiles">
+        <label class="form-check-label" for="showOnlyNewFiles">
+            Show only new files
+        </label>
+    </div>
+</div>
+
+@if (Links == null)
 {
     <p>
         <h1>Loading...</h1>
@@ -20,7 +29,7 @@ else
         </tr>
         </thead>
         <tbody>
-        @foreach (var link in _links)
+        @foreach (var link in Links)
         {
             <tr>
                 <td>
@@ -59,7 +68,13 @@ else
 }
 
 @code {
-    private HardLinkViewModel[]? _links;
+    private HardLinkViewModel[]? AllLinks { get; set; }
+
+    private HardLinkViewModel[]? NewLinks { get; set; }
+
+    private HardLinkViewModel[]? Links => ShowOnlyNewFiles ? NewLinks : AllLinks;
+
+    public bool ShowOnlyNewFiles { get; set; } = true;
 
     private async Task GuessIt(HardLinkViewModel link)
     {
@@ -105,7 +120,10 @@ else
     protected override async Task OnInitializedAsync()
     {
         var links = await Http.GetFromJsonAsync<HardLinkData[]>("api/links");
-        _links = links.Select(e => new HardLinkViewModel(e)).ToArray();
+        AllLinks = links != null
+            ? links.Select(e => new HardLinkViewModel(e)).ToArray()
+            : Array.Empty<HardLinkViewModel>();
+        NewLinks = AllLinks.Where(e => e.Targets.Count == 0).ToArray();
     }
 
 }
