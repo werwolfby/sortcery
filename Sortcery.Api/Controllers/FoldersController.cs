@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Sortcery.Api.Contracts.Models;
 using Sortcery.Api.Mapper;
 using Sortcery.Engine.Contracts;
 
@@ -18,10 +19,10 @@ public class FoldersController : ControllerBase
     [HttpGet]
     public IActionResult Get()
     {
-        return Ok(new
+        return Ok(new Folders
         {
             Source = _foldersProvider.Source.ToApi(),
-            DestinationFolders = _foldersProvider.DestinationFolders.Select(x => x.ToApi())
+            DestinationFolders = _foldersProvider.DestinationFolders.Select(x => x.ToApi()).ToArray()
         });
     }
 }
