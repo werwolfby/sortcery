@@ -26,31 +26,6 @@ public class Linker : ILinker
             .Select(x => (Folder: x, Files: (IReadOnlyDictionary<HardLinkId, FileData>)x.GetAllFilesRecursively().ToDictionary(x => x.HardLinkId).AsReadOnly()))
             .ToList();
 
-        Links = FindLinks(sourceFiles, destinationFolderFiles);
-    }
-
-    public async Task<FileData> GuessAsync(FileData fileData)
-    {
-        var guess = await _guessItApi.GuessAsync(fileData.Name);
-        return guess.Type switch
-        {
-            "movie" => GuessMovie(guess, fileData.Name),
-            "episode" => GuessEpisode(guess, fileData.Name),
-            _ => throw new NotSupportedException($"Unknown guess type: {guess.Type}")
-        };
-    }
-
-    public bool Link(FileData sourceFile, FileData destinationFile)
-    {
-        if (!sourceFile.Link(destinationFile)) return false;
-        destinationFile.Dir.AddFile(destinationFile);
-        return true;
-    }
-
-    internal IReadOnlyList<HardLinkData> FindLinks(
-        IReadOnlyDictionary<HardLinkId, FileData> sourceFiles,
-        IReadOnlyList<(FolderData Folder, IReadOnlyDictionary<HardLinkId, FileData> Files)> destinationFolderFiles)
-    {
         var maxCapacity = Math.Max(
             sourceFiles.Count,
             destinationFolderFiles.Sum(d => d.Files.Count));
@@ -88,13 +63,32 @@ public class Linker : ILinker
             }
         }
 
-        return result
+        Links = result
             .Select(x =>
                 new HardLinkData(x.Value.Source,
                     x.Value.Targets
                     ?? (IReadOnlyList<FileData>)Array.Empty<FileData>()))
             .ToList()
             .AsReadOnly();
+
+    }
+
+    public async Task<FileData> GuessAsync(FileData fileData)
+    {
+        var guess = await _guessItApi.GuessAsync(fileData.Name);
+        return guess.Type switch
+        {
+            "movie" => GuessMovie(guess, fileData.Name),
+            "episode" => GuessEpisode(guess, fileData.Name),
+            _ => throw new NotSupportedException($"Unknown guess type: {guess.Type}")
+        };
+    }
+
+    public bool Link(FileData sourceFile, FileData destinationFile)
+    {
+        if (!sourceFile.Link(destinationFile)) return false;
+        destinationFile.Dir.AddFile(destinationFile);
+        return true;
     }
 
     private FileData GuessMovie(Guess guess, string filename)
