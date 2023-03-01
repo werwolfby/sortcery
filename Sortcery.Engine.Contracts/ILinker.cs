@@ -8,5 +8,5 @@ public interface ILinker
 
     Task<FileData> GuessAsync(FileData fileData);
 
-    void Link(FileData sourceFile, FileData destinationFile);
+    bool Link(FileData sourceFile, FileData destinationFile);
 }

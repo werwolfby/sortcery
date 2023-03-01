@@ -99,6 +99,14 @@ public class FolderData
         return fileData;
     }
 
+    public void AddFile(FileData fileData)
+    {
+        if (fileData.Dir != this)
+            throw new ArgumentException("File must be in this folder.", nameof(fileData));
+
+        _files.Add(fileData);
+    }
+
     public FileData GetOrAddFile(string name, HardLinkId hardLinkId) =>
         GetFile(name) ?? AddFile(name, hardLinkId);
 

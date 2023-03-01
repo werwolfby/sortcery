@@ -112,7 +112,8 @@ else
             var query = Path.Join("api/links", link.Source!.Dir, relativeName);
             using var linkResponse = await Http.PostAsJsonAsync(query, link.Guess!);
             linkResponse.EnsureSuccessStatusCode();
-            link.Targets.Add(link.Guess!);
+            var result = await linkResponse.Content.ReadFromJsonAsync<FileData>();
+            link.Targets.Add(result!);
             link.Guess = null;
         }
         finally

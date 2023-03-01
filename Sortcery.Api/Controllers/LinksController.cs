@@ -45,8 +45,11 @@ public class LinksController : ControllerBase
         var destinationFolder = destinationRootFolder.EnsureFolder(body.Path.Split(Path.DirectorySeparatorChar));
         var destinationFile = new FileData(destinationFolder, HardLinkId.Empty, body.Name);
 
-        _linker.Link(sourceFile, destinationFile);
+        if (!_linker.Link(sourceFile, destinationFile))
+        {
+            return StatusCode(500, $"Failed to link {sourceFile.FullName} to {destinationFile.FullName}");
+        }
 
-        return Created($"{dir}/{filePath}", null);
+        return Created($"{dir}/{filePath}", destinationFile.ToApi());
     }
 }

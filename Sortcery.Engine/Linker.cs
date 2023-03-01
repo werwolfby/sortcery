@@ -40,7 +40,12 @@ public class Linker : ILinker
         };
     }
 
-    public void Link(FileData sourceFile, FileData destinationFile) => sourceFile.Link(destinationFile);
+    public bool Link(FileData sourceFile, FileData destinationFile)
+    {
+        if (!sourceFile.Link(destinationFile)) return false;
+        destinationFile.Dir.AddFile(destinationFile);
+        return true;
+    }
 
     internal IReadOnlyList<HardLinkData> FindLinks(
         IReadOnlyDictionary<HardLinkId, FileData> sourceFiles,
