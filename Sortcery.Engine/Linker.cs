@@ -109,8 +109,12 @@ public class Linker : ILinker
             throw new InvalidOperationException("Unknown destination folder: Series");
         }
 
-        var showFolder = destinationFolder.GetOrAddFolder(guess.Title);
-        var seasonFolder = showFolder.GetOrAddFolder($"Season {guess.Season}");
+        // Create temporary/virtual folder structure if it doesn't exist
+        var showFolder = destinationFolder.GetFolder(guess.Title)
+                         ?? new FolderData(Path.Join(destinationFolder.FullName, guess.Title), destinationFolder);
+        var seasonFolderName = $"Season {guess.Season}";
+        var seasonFolder = showFolder.GetFolder(seasonFolderName)
+                           ?? new FolderData(Path.Join(showFolder.FullName, seasonFolderName), showFolder);;
 
         return new FileData(seasonFolder, HardLinkId.Empty, filename);
     }

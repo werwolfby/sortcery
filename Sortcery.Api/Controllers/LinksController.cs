@@ -24,24 +24,29 @@ public class LinksController : ControllerBase
         return Ok(_linker.Links.ToHardLinkData());
     }
 
-    [HttpPost("{dir}/{*relativePath}")]
-    public IActionResult Link(string dir, string relativePath, [FromBody]Contracts.Models.FileData body)
+    [HttpPost("{dir}/{*filePath}")]
+    public IActionResult Link(string dir, string filePath, [FromBody]Contracts.Models.FileData body)
     {
         if (_foldersProvider.Source.Name != dir)
         {
             return NotFound($"Unknown source folder: {dir}");
         }
 
-        if (!_foldersProvider.TryGetDestinationFolder(body.Dir, out var destinationFolder))
+        if (!_foldersProvider.TryGetDestinationFolder(body.Dir, out var destinationRootFolder))
         {
             return BadRequest($"Unknown destination folder: {body.Dir}");
         }
 
-        var sourceFile = new FileData(_foldersProvider.Source, HardLinkId.Empty, relativePath);
+        var sourceFile = _foldersProvider.Source.FindFile(filePath.Split('/'));
+        if (sourceFile == null)
+        {
+            return NotFound($"Unknown source file: {filePath}");
+        }
+        var destinationFolder = destinationRootFolder.EnsureFolder(body.Path.Split(Path.DirectorySeparatorChar));
         var destinationFile = new FileData(destinationFolder, HardLinkId.Empty, body.Name);
 
         _linker.Link(sourceFile, destinationFile);
 
-        return Created($"{dir}/{relativePath}", null);
+        return Created($"{dir}/{filePath}", null);
     }
 }

@@ -53,6 +53,36 @@ public class FolderData
         _folders.FirstOrDefault(x => x.Name == name)
         ?? _folders.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
 
+    public FolderData? FindFolder(string[] folderPath)
+    {
+        if (folderPath.Length == 0)
+            throw new ArgumentException("Folder path must not be empty.", nameof(folderPath));
+
+        var folder = this;
+        for (var i = 0; i < folderPath.Length; i++)
+        {
+            folder = folder.GetFolder(folderPath[i]);
+            if (folder == null)
+                return null;
+        }
+
+        return folder;
+    }
+
+    public FolderData EnsureFolder(string[] folderPath)
+    {
+        if (folderPath.Length == 0)
+            throw new ArgumentException("Folder path must not be empty.", nameof(folderPath));
+
+        var folder = this;
+        for (var i = 0; i < folderPath.Length; i++)
+        {
+            folder = folder.GetOrAddFolder(folderPath[i]);
+        }
+
+        return folder;
+    }
+
     public void RemoveFolder(string name)
     {
         var folder = GetFolder(name);
@@ -90,15 +120,7 @@ public class FolderData
         if (filePath.Length == 0)
             throw new ArgumentException("File path must not be empty.", nameof(filePath));
 
-        var folder = this;
-        for (var i = 0; i < filePath.Length - 1; i++)
-        {
-            folder = folder.GetFolder(filePath[i]);
-            if (folder == null)
-                return null;
-        }
-
-        return folder.Files.FirstOrDefault(x => x.Name == filePath[^1]);
+        return FindFolder(filePath[..^1])?.GetFile(filePath[^1]);
     }
 
     public IEnumerable<FileData> GetAllFilesRecursively()
