@@ -131,6 +131,8 @@ public class FolderData
         return FindFolder(filePath[..^1])?.GetFile(filePath[^1]);
     }
 
+    public int GetAllFilesCount() => Files.Count + Folders.Sum(x => x.GetAllFilesCount());
+
     public IEnumerable<FileData> GetAllFilesRecursively()
     {
         foreach (var folder in Folders)

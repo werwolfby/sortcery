@@ -21,56 +21,47 @@ public class Linker : ILinker
     {
         _foldersProvider.Update();
 
-        var sourceFiles = _foldersProvider.Source.GetAllFilesRecursively().ToDictionary(x => x.HardLinkId);
         var destinationFolderFiles = _foldersProvider.DestinationFolders.Values
-            .Select(x => (Folder: x, Files: (IReadOnlyDictionary<HardLinkId, FileData>)x.GetAllFilesRecursively().ToDictionary(x => x.HardLinkId).AsReadOnly()))
+            .Select(x => x.GetAllFilesRecursively().ToDictionaryAggregated(x => x.HardLinkId))
             .ToList();
 
         var maxCapacity = Math.Max(
-            sourceFiles.Count,
-            destinationFolderFiles.Sum(d => d.Files.Count));
-        var result = new Dictionary<HardLinkId,(FileData? Source, List<FileData>? Targets)>(maxCapacity);
+            _foldersProvider.Source.GetAllFilesCount(),
+            destinationFolderFiles.Sum(d => d.Count));
+        var result = new List<(FileData? Source, List<FileData>? Targets)>(maxCapacity);
 
         // Find all hardlinks in the source folder
-        foreach (var (hardLinkId, fileData) in sourceFiles)
+        var existingHardLinks = new HashSet<HardLinkId>();
+        foreach (var fileData in _foldersProvider.Source.GetAllFilesRecursively())
         {
-            var exists = false;
-            foreach (var (_, destinationFiles) in destinationFolderFiles)
+            var hardLinkId = fileData.HardLinkId;
+            List<FileData>? targets = null;
+            foreach (var destinationFiles in destinationFolderFiles)
             {
-                if (!destinationFiles.TryGetValue(hardLinkId, out var destinationFileData)) continue;
-
-                if (!result.TryGetValue(hardLinkId, out var hardLinkData))
+                if (destinationFiles.TryGetValue(hardLinkId, out var destinationFileDataList))
                 {
-                    hardLinkData = (fileData, new List<FileData>());
-                    result.Add(hardLinkId, hardLinkData);
+                    targets ??= new List<FileData>();
+                    targets.AddRange(destinationFileDataList);
+                    existingHardLinks.Add(hardLinkId);
                 }
-                hardLinkData.Targets!.Add(destinationFileData);
-                exists = true;
             }
-            if (!exists)
-            {
-                result.Add(hardLinkId, (fileData, null));
-            }
+            result.Add((fileData, targets));
         }
 
         // Find all hardlinks that exists only in at any destination folder but not in the source folder
-        foreach (var (_, destinationFiles) in destinationFolderFiles)
+        foreach (var destinationFiles in destinationFolderFiles)
         {
-            foreach (var (hardLinkId, fileData) in destinationFiles)
+            foreach (var (hardLinkId, fileDataList) in destinationFiles)
             {
-                if (result.ContainsKey(hardLinkId)) continue;
-                result.Add(hardLinkId, (null, new List<FileData> {fileData}));
+                if (existingHardLinks.Contains(hardLinkId)) continue;
+                result.Add((null, fileDataList));
             }
         }
 
         Links = result
-            .Select(x =>
-                new HardLinkData(x.Value.Source,
-                    x.Value.Targets
-                    ?? (IReadOnlyList<FileData>)Array.Empty<FileData>()))
+            .Select(x => new HardLinkData(x.Source, x.Targets ?? (IReadOnlyList<FileData>)Array.Empty<FileData>()))
             .ToList()
             .AsReadOnly();
-
     }
 
     public async Task<FileData> GuessAsync(FileData fileData)
