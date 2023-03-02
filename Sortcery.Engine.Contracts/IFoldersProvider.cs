@@ -18,4 +18,6 @@ public interface IFoldersProvider
 
     bool TryGetDestinationFolder(FolderType type, [MaybeNullWhen(false)]out FolderData folderData) =>
         DestinationFolders.TryGetValue(type, out folderData);
+
+    public FolderType GetDestinationFolderType(FolderData dir) => DestinationFolders.FirstOrDefault(x => x.Value == dir).Key;
 }

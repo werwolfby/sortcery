@@ -59,7 +59,7 @@ public class Linker : ILinker
         }
 
         Links = result
-            .Select(x => new HardLinkData(x.Source, x.Targets ?? (IReadOnlyList<FileData>)Array.Empty<FileData>()))
+            .Select(x => new HardLinkData(x.Source, x.Targets?.AsReadOnly() ?? (IReadOnlyList<FileData>)Array.Empty<FileData>()))
             .ToList()
             .AsReadOnly();
     }

@@ -4,6 +4,7 @@ public class FolderData
 {
     private readonly List<FolderData> _folders = new();
     private readonly List<FileData> _files = new();
+    private readonly Dictionary<string, HashSet<object>> _properties = new();
 
     public FolderData(string fullName, FolderData? parent = null)
     {
@@ -139,9 +140,17 @@ public class FolderData
             yield return file;
     }
 
-    public void Deconstruct(out string path, out string name)
+    public void AddProperty<T>(string property, T value)
     {
-        path = Path;
-        name = Name;
+        if (!_properties.TryGetValue(property, out var hash))
+        {
+            hash = new HashSet<object>();
+            _properties.Add(property, hash);
+        }
+
+        hash.Add(value!);
     }
+
+    public bool HasProperty<T>(string property, T value) =>
+        _properties.TryGetValue(property, out var hash) && hash.Contains(value!);
 }

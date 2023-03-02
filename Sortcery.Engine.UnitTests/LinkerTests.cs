@@ -24,9 +24,9 @@ public class Tests
                 ExpectedLinks
                     .Select(e => (
                         e.source != null
-                            ? FixPath(Path.Join(sourcePath, e.source))
+                            ? Path.Join(sourcePath, e.source).FixPath()
                             : null,
-                        e.targets.Select(t => FixPath(Path.Join(t.targetDir, t.file))).ToArray()
+                        e.targets.Select(t => Path.Join(t.targetDir, t.file).FixPath()).ToArray()
                     )).ToArray()
             ).SetName("{m} - " + Name);
         }
@@ -39,20 +39,20 @@ public class Tests
         (string? source, string[] targets)[] expectedLinks)
     {
         // Arrange
-        var sourceDir = new FolderData(FixPath("/Downloads/Completed"));
+        var sourceDir = new FolderData("/Downloads/Completed".FixPath());
         foreach (var (inode, filePath) in sourceFiles)
         {
             var fileParts = filePath.Split('/');
             var dir = fileParts.Length > 1
                 ? sourceDir.EnsureFolder(fileParts[..^1])
                 : sourceDir;
-            dir.GetOrAddFile(fileParts[^1], NewHardLinkId(inode));
+            dir.GetOrAddFile(fileParts[^1], Utils.NewHardLinkId(inode));
         }
 
         var destinationFolders = new Dictionary<FolderType, FolderData>();
         foreach (var ((folderType, targetDir), targetFiles) in targetDirFiles)
         {
-            var targetFolder = new FolderData(FixPath(targetDir));
+            var targetFolder = new FolderData(targetDir.FixPath());
             destinationFolders.Add(folderType, targetFolder);
             foreach (var (inode, filePath) in targetFiles)
             {
@@ -60,7 +60,7 @@ public class Tests
                 var dir = fileParts.Length > 1
                     ? targetFolder.EnsureFolder(fileParts[..^1])
                     : targetFolder;
-                dir.GetOrAddFile(fileParts[^1], NewHardLinkId(inode));
+                dir.GetOrAddFile(fileParts[^1], Utils.NewHardLinkId(inode));
             }
         }
 
@@ -91,16 +91,6 @@ public class Tests
             }
         }
     }
-
-    private static HardLinkId NewHardLinkId(int inode)
-    {
-        #if _WINDOWS
-        return new HardLinkId((uint)inode, 0, 0);
-        #else
-        return new HardLinkId(inode, 0);
-        #endif
-    }
-
 
     public static IEnumerable<TestCaseData> FindLinksTestCases()
     {
@@ -370,7 +360,4 @@ public class Tests
             }
         }.GetTestCaseData("/Downloads/Completed");
     }
-
-    private static string FixPath(string path) =>
-        path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
 }
