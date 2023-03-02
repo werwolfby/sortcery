@@ -55,9 +55,6 @@ public class FolderData
 
     public FolderData? FindFolder(string[] folderPath)
     {
-        if (folderPath.Length == 0)
-            throw new ArgumentException("Folder path must not be empty.", nameof(folderPath));
-
         var folder = this;
         for (var i = 0; i < folderPath.Length; i++)
         {
@@ -71,9 +68,6 @@ public class FolderData
 
     public FolderData EnsureFolder(string[] folderPath)
     {
-        if (folderPath.Length == 0)
-            throw new ArgumentException("Folder path must not be empty.", nameof(folderPath));
-
         var folder = this;
         for (var i = 0; i < folderPath.Length; i++)
         {
