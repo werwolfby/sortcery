@@ -151,6 +151,21 @@ public class FolderData
         hash.Add(value!);
     }
 
+    public IReadOnlySet<T> GetPropertyValues<T>(string property) =>
+        _properties.TryGetValue(property, out var hash) ? Extract<T>(hash) : new HashSet<T>();
+
     public bool HasProperty<T>(string property, T value) =>
         _properties.TryGetValue(property, out var hash) && hash.Contains(value!);
+
+    private IReadOnlySet<T> Extract<T>(HashSet<object> set)
+    {
+        var result = new HashSet<T>(set.Count);
+        foreach (var item in set)
+        {
+            if (item is T casted)
+                result.Add(casted);
+        }
+
+        return result;
+    }
 }
