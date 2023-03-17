@@ -157,6 +157,8 @@ public class FolderData
     public bool HasProperty<T>(string property, T value) =>
         _properties.TryGetValue(property, out var hash) && hash.Contains(value!);
 
+    public override string ToString() => FullName;
+
     private IReadOnlySet<T> Extract<T>(HashSet<object> set)
     {
         var result = new HashSet<T>(set.Count);
