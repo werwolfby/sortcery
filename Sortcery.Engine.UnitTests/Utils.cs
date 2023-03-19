@@ -15,4 +15,16 @@ public static class Utils
         return new HardLinkId(inode, 0);
 #endif
     }
+
+    public static FolderData FindOrFakeFolder(this FolderData folder, string[] parts)
+    {
+        var current = folder;
+        foreach (var part in parts)
+        {
+            current = current.Folders.FirstOrDefault(x => x.Name == part)
+                      ?? new FolderData(Path.Join(current.FullName, part), current);
+        }
+
+        return current;
+    }
 }

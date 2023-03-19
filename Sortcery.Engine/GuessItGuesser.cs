@@ -47,12 +47,40 @@ public class GuessItGuesser
         var resultFolder = showFolder;
         if (guess.Season.HasValue)
         {
-            var seasonFolderName = $"Season {guess.Season}";
-            var seasonFolder = showFolder.GetFolder(seasonFolderName)
-                               ?? new FolderData(Path.Join(showFolder.FullName, seasonFolderName), showFolder);
-            resultFolder = seasonFolder;
+            resultFolder = GetOrCreateSeasonFolderData(showFolder, guess.Season.Value);
         }
 
         return new FileData(resultFolder, HardLinkId.Empty, filename);
+    }
+
+    private FolderData GetOrCreateSeasonFolderData(FolderData showFolder, int season)
+    {
+        var seasonFormats = new Dictionary<string, List<int>>();
+        foreach (var folder in showFolder.Folders)
+        {
+            if (!SeasonFolderParser.TryParse(folder.Name, out var format, out var seasonNumber))
+            {
+                continue;
+            }
+
+            if (seasonNumber == season)
+            {
+                return folder;
+            }
+
+            seasonFormats.Add(format, seasonNumber);
+        }
+
+        var seasonFormat = seasonFormats.Count switch
+        {
+            0 => "Season {0}",
+            1 => seasonFormats.Single().Key,
+            _ => seasonFormats.MaxBy(e => e.Value.Max()).Key
+        };
+
+        var seasonFolderName = string.Format(seasonFormat, season);
+        var seasonFolder = showFolder.GetFolder(seasonFolderName)
+                           ?? new FolderData(Path.Join(showFolder.FullName, seasonFolderName), showFolder);
+        return seasonFolder;
     }
 }
