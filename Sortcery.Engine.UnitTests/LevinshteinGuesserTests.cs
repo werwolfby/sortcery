@@ -71,93 +71,14 @@ public class LevinshteinGuesserTests
             .CreateTestCaseData("Captain Marvel.2018.BDRip.mkv", null);
     }
 
-    private class GuesserTestCaseData
+    private class GuesserTestCaseData : GuesserTestCaseDataBase<GuesserTestCaseData>
     {
-        private readonly string _name;
-        private readonly FolderData _sourceDir;
-        private readonly Dictionary<FolderType, FolderData> _targetDirs;
-
-        public GuesserTestCaseData(string name, string sourceDir, params (FolderType type, string path)[] targetDirs)
+        public GuesserTestCaseData(string name, string sourceDir, params (FolderType type, string path)[] targetDirs) : base(name, sourceDir, targetDirs)
         {
-            _name = name;
-            _sourceDir = new FolderData(sourceDir.FixPath());
-            _targetDirs = targetDirs.ToDictionary(d => d.type, d => new FolderData(d.path.FixPath()));
         }
 
-        public GuesserTestCaseData AddSource(string path, int hardLinkId)
-        {
-            path = path.FixPath();
-            var parts = path.Split(Path.DirectorySeparatorChar);
-            _sourceDir.EnsureFolder(parts[..^1]).AddFile(parts[^1], Utils.NewHardLinkId(hardLinkId));
-            return this;
-        }
-
-        public GuesserTestCaseData AddTarget(FolderType type, string path, int hardLinkId)
-        {
-            path = path.FixPath();
-            var parts = path.Split(Path.DirectorySeparatorChar);
-            _targetDirs[type].EnsureFolder(parts[..^1]).AddFile(parts[^1], Utils.NewHardLinkId(hardLinkId));
-            return this;
-        }
-
-        public TestCaseData CreateTestCaseData(string source, (FolderType type, string destination)? destination)
-        {
-            source = source.FixPath();
-            var sourceParts = source.Split(Path.DirectorySeparatorChar);
-            var sourceFile = _sourceDir.FindFile(sourceParts) ?? throw new InvalidOperationException("Source file not found");
-
-            FileData? destinationFile;
-            if (destination == null)
-            {
-                destinationFile = null;
-            }
-            else
-            {
-                var destinationPath = destination.Value.destination.FixPath();
-                var destinationParts = destinationPath.Split(Path.DirectorySeparatorChar);
-                var destinationFolder = _targetDirs[destination.Value.type].EnsureFolder(destinationParts[..^1]);
-                destinationFile = new FileData(destinationFolder, HardLinkId.Empty, destinationParts[^1]);
-            }
-
-            var foldersProvider = new Mock<IFoldersProvider>();
-            foldersProvider.CallBase = true;
-            foldersProvider.Setup(p => p.Source).Returns(_sourceDir);
-            foldersProvider.Setup(p => p.DestinationFolders).Returns(_targetDirs);
-
-            var hardlinks = new List<HardLinkData>();
-            var usedTargets = new HashSet<HardLinkId>();
-
-            foreach (var fileData in _sourceDir.GetAllFilesRecursively())
-            {
-                var targets = new List<FileData>();
-                foreach (var (_, folderData) in _targetDirs)
-                {
-                    foreach (var target in folderData.GetAllFilesRecursively())
-                    {
-                        if (target.HardLinkId == fileData.HardLinkId)
-                        {
-                            targets.Add(target);
-                            usedTargets.Add(target.HardLinkId);
-                        }
-                    }
-                }
-
-                hardlinks.Add(new HardLinkData(fileData, targets.Count > 0 ? targets.AsReadOnly() : Array.Empty<FileData>()));
-            }
-
-            foreach (var folderData in _targetDirs)
-            {
-                foreach (var fileData in folderData.Value.GetAllFilesRecursively())
-                {
-                    if (!usedTargets.Contains(fileData.HardLinkId))
-                    {
-                        hardlinks.Add(new HardLinkData(null, new List<FileData> { fileData }.AsReadOnly()));
-                    }
-                }
-            }
-
-            return new TestCaseData(foldersProvider.Object, hardlinks, sourceFile, destinationFile).SetName(_name);
-        }
+        protected override TestCaseData CreateTestCaseData(Mock<IGuessItApi> guessItApiMock,
+            Mock<IFoldersProvider> foldersProviderMock, IReadOnlyList<HardLinkData> hardlinks, FileData sourceFile,
+            FileData? destinationFile) => new(foldersProviderMock.Object, hardlinks, sourceFile, destinationFile);
     }
-
 }
