@@ -30,7 +30,7 @@ public class LevinshteinGuesserTests
             .AddSource("Flash.S09E01.1080p.rus.LostFilm.TV.mkv", 1)
             .AddSource("Flash.S09E02.1080p.rus.LostFilm.TV.mkv", 2)
             .AddTarget(FolderType.Shows, "The Flash/Season 09/Flash.S09E01.1080p.rus.LostFilm.TV.mkv", 1)
-            .CreateTestCaseData("Flash.S09E02.1080p.rus.LostFilm.TV.mkv", FolderType.Shows, "The Flash/Season 09/Flash.S09E02.1080p.rus.LostFilm.TV.mkv");
+            .CreateTestCaseData("Flash.S09E02.1080p.rus.LostFilm.TV.mkv", (FolderType.Shows, "The Flash/Season 09/Flash.S09E02.1080p.rus.LostFilm.TV.mkv"));
 
         yield return new GuesserTestCaseData("Flash to The Flash folder with multiple similar", "/Downloads", (FolderType.Shows, "/Shows"))
             .AddSource("Flash.S09E01.1080p.rus.LostFilm.TV.mkv", 1)
@@ -38,7 +38,7 @@ public class LevinshteinGuesserTests
             .AddSource("Flash.S09E03.1080p.rus.LostFilm.TV.mkv", 3)
             .AddTarget(FolderType.Shows, "The Flash/Season 09/Flash.S09E01.1080p.rus.LostFilm.TV.mkv", 1)
             .AddTarget(FolderType.Shows, "The Flash/Season 09/Flash.S09E02.1080p.rus.LostFilm.TV.mkv", 2)
-            .CreateTestCaseData("Flash.S09E03.1080p.rus.LostFilm.TV.mkv", FolderType.Shows, "The Flash/Season 09/Flash.S09E03.1080p.rus.LostFilm.TV.mkv");
+            .CreateTestCaseData("Flash.S09E03.1080p.rus.LostFilm.TV.mkv", (FolderType.Shows, "The Flash/Season 09/Flash.S09E03.1080p.rus.LostFilm.TV.mkv"));
 
         yield return new GuesserTestCaseData("Flash to The Flash folder with multiple seasons", "/Downloads", (FolderType.Shows, "/Shows"))
             .AddSource("Flash.S08E01.1080p.rus.LostFilm.TV.mkv", 1)
@@ -52,7 +52,23 @@ public class LevinshteinGuesserTests
             .AddTarget(FolderType.Shows, "The Flash/Season 08/Flash.S08E03.1080p.rus.LostFilm.TV.mkv", 3)
             .AddTarget(FolderType.Shows, "The Flash/Season 09/Flash.S09E01.1080p.rus.LostFilm.TV.mkv", 4)
             .AddTarget(FolderType.Shows, "The Flash/Season 09/Flash.S09E02.1080p.rus.LostFilm.TV.mkv", 5)
-            .CreateTestCaseData("Flash.S09E03.1080p.rus.LostFilm.TV.mkv", FolderType.Shows, "The Flash/Season 09/Flash.S09E03.1080p.rus.LostFilm.TV.mkv");
+            .CreateTestCaseData("Flash.S09E03.1080p.rus.LostFilm.TV.mkv", (FolderType.Shows, "The Flash/Season 09/Flash.S09E03.1080p.rus.LostFilm.TV.mkv"));
+
+        yield return new GuesserTestCaseData("Mad Max Trilogy into Mad Max movies folder", "/Downloads", (FolderType.Movies, "/Movies"))
+            .AddSource("Mad Max 1.US.1979.DVDRip.mkv", 1)
+            .AddSource("Mad Max 2.US.1981.DVDRip.mkv", 2)
+            .AddSource("Mad Max 3.US.1985.DVDRip.mkv", 3)
+            .AddTarget(FolderType.Movies, "Mad Max/Mad Max 1.US.1979.DVDRip.mkv", 1)
+            .AddTarget(FolderType.Movies, "Mad Max/Mad Max 2.US.1981.DVDRip.mkv", 2)
+            .CreateTestCaseData("Mad Max 3.US.1985.DVDRip.mkv", (FolderType.Movies, "Mad Max/Mad Max 3.US.1985.DVDRip.mkv"));
+
+        yield return new GuesserTestCaseData("Completely different movies will not be guessed", "/Downloads", (FolderType.Movies, "/Movies"))
+            .AddSource("Mad Max 1.US.1979.DVDRip.mkv", 1)
+            .AddSource("Avengers.Infinity War.2019.BDRip.mkv", 2)
+            .AddSource("Captain Marvel.2018.BDRip.mkv", 3)
+            .AddTarget(FolderType.Movies, "Mad Max/Mad Max 1.US.1979.DVDRip.mkv", 1)
+            .AddTarget(FolderType.Movies, "Avengers.Infinity War.2019.BDRip.mkv", 2)
+            .CreateTestCaseData("Captain Marvel.2018.BDRip.mkv", null);
     }
 
     private class GuesserTestCaseData
@@ -84,16 +100,24 @@ public class LevinshteinGuesserTests
             return this;
         }
 
-        public TestCaseData CreateTestCaseData(string source, FolderType type, string destination)
+        public TestCaseData CreateTestCaseData(string source, (FolderType type, string destination)? destination)
         {
             source = source.FixPath();
             var sourceParts = source.Split(Path.DirectorySeparatorChar);
             var sourceFile = _sourceDir.FindFile(sourceParts) ?? throw new InvalidOperationException("Source file not found");
 
-            destination = destination.FixPath();
-            var destinationParts = destination.Split(Path.DirectorySeparatorChar);
-            var destinationFolder = _targetDirs[type].EnsureFolder(destinationParts[..^1]);
-            var destinationFile = new FileData(destinationFolder, HardLinkId.Empty, destinationParts[^1]);
+            FileData? destinationFile;
+            if (destination == null)
+            {
+                destinationFile = null;
+            }
+            else
+            {
+                var destinationPath = destination.Value.destination.FixPath();
+                var destinationParts = destinationPath.Split(Path.DirectorySeparatorChar);
+                var destinationFolder = _targetDirs[destination.Value.type].EnsureFolder(destinationParts[..^1]);
+                destinationFile = new FileData(destinationFolder, HardLinkId.Empty, destinationParts[^1]);
+            }
 
             var foldersProvider = new Mock<IFoldersProvider>();
             foldersProvider.CallBase = true;
