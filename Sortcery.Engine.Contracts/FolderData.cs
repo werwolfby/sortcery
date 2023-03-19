@@ -159,6 +159,8 @@ public class FolderData
 
     public override string ToString() => FullName;
 
+    public override int GetHashCode() => FullName.GetHashCode();
+
     private IReadOnlySet<T> Extract<T>(HashSet<object> set)
     {
         var result = new HashSet<T>(set.Count);

@@ -3,6 +3,24 @@ using Zeroshtein;
 
 namespace Sortcery.Engine;
 
+public readonly record struct SimilarityRatio(int Distance, int Length)
+{
+    public float Ratio => 1.0f - Distance / (float)Length;
+
+    public static bool operator > (SimilarityRatio left, SimilarityRatio right) => left.Ratio > right.Ratio;
+
+    public static bool operator < (SimilarityRatio left, SimilarityRatio right) => left.Ratio < right.Ratio;
+}
+
+public class SimilarityRatios
+{
+    private readonly List<SimilarityRatio> _rations = new();
+
+    public float Average => _rations.Average(x => x.Ratio);
+
+    public void Add(SimilarityRatio ratio) => _rations.Add(ratio);
+}
+
 public class LevinshteinGuesser
 {
     private readonly IFoldersProvider _foldersProvider;
@@ -19,35 +37,44 @@ public class LevinshteinGuesser
         // It makes sense only for root files
         if (source.Dir != _foldersProvider.Source) return null;
 
-        (HardLinkData source, float similarityRatio)? maxSimilar = default;
+        var similarities =  new Dictionary<SimilarityRatio, List<HardLinkData>>();
 
         foreach (var link in links)
         {
             if (link.Source is null || link.Targets.Count <= 0 || link.Source.Dir != _foldersProvider.Source) continue;
             if (link.Source.HardLinkId == source.HardLinkId || source == link.Source) continue;
 
-            var sourceName = source.Name;
-            var targetName = link.Targets[0].Name;
-            var similarityRatio = GetSimilarityRatio(sourceName, targetName);
+            var similarityRatio = GetSimilarityRatio(source.Name, link.Source.Name);
             // If current similarity ratio is less than current minimum, then update minimum
             // comparison is reversed because nullable float comparison will be always false for null
-            if (!maxSimilar.HasValue || similarityRatio > maxSimilar.Value.similarityRatio)
+            if (similarityRatio.Ratio < SimilarityRatioThreshold) continue;
+
+            similarities.Add(similarityRatio, link);
+        }
+
+        if (similarities.Count <= 0) return null;
+
+        var destinations = new Dictionary<FolderData, SimilarityRatios>();
+
+        foreach (var (similarityRatio, similarLinks) in similarities)
+        {
+            foreach (var similarLink in similarLinks)
             {
-                maxSimilar = (link, similarityRatio);
+                foreach (var target in similarLink.Targets)
+                {
+                    destinations.GetOrAdd(target.Dir).Add(similarityRatio);
+                }
             }
         }
 
-        if (maxSimilar is null) return null;
+        var maxSimilarity = destinations.MaxBy(x => x.Value.Average);
 
-        // If similarity ratio is less than threshold, then we don't consider it as a match
-        if (maxSimilar.Value.similarityRatio < SimilarityRatioThreshold) return null;
-
-        return new FileData(maxSimilar.Value.source.Targets[0].Dir, HardLinkId.Empty, source.Name);
+        return new FileData(maxSimilarity.Key, HardLinkId.Empty, source.Name);
     }
 
-    private float GetSimilarityRatio(string sourceName, string targetName)
+    private SimilarityRatio GetSimilarityRatio(string sourceName, string targetName)
     {
         var distance = Levenshtein.Distance(sourceName, targetName);
-        return 1.0f - distance / (float)Math.Max(sourceName.Length, targetName.Length);
+        return new SimilarityRatio(distance, Math.Max(sourceName.Length, targetName.Length));
     }
 }

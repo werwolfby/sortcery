@@ -26,13 +26,13 @@ public class LevinshteinGuesserTests
 
     public static IEnumerable<TestCaseData> GetTestCases()
     {
-        yield return new GuesserTestCaseData("Flash to The Flash folder", "/Shows", (FolderType.Shows, "/Shows"))
+        yield return new GuesserTestCaseData("Flash to The Flash folder", "/Downloads", (FolderType.Shows, "/Shows"))
             .AddSource("Flash.S09E01.1080p.rus.LostFilm.TV.mkv", 1)
             .AddSource("Flash.S09E02.1080p.rus.LostFilm.TV.mkv", 2)
             .AddTarget(FolderType.Shows, "The Flash/Season 09/Flash.S09E01.1080p.rus.LostFilm.TV.mkv", 1)
             .CreateTestCaseData("Flash.S09E02.1080p.rus.LostFilm.TV.mkv", FolderType.Shows, "The Flash/Season 09/Flash.S09E02.1080p.rus.LostFilm.TV.mkv");
 
-        yield return new GuesserTestCaseData("Flash to The Flash folder with multiple similar", "/Shows", (FolderType.Shows, "/Shows"))
+        yield return new GuesserTestCaseData("Flash to The Flash folder with multiple similar", "/Downloads", (FolderType.Shows, "/Shows"))
             .AddSource("Flash.S09E01.1080p.rus.LostFilm.TV.mkv", 1)
             .AddSource("Flash.S09E02.1080p.rus.LostFilm.TV.mkv", 2)
             .AddSource("Flash.S09E03.1080p.rus.LostFilm.TV.mkv", 3)
@@ -40,7 +40,7 @@ public class LevinshteinGuesserTests
             .AddTarget(FolderType.Shows, "The Flash/Season 09/Flash.S09E02.1080p.rus.LostFilm.TV.mkv", 2)
             .CreateTestCaseData("Flash.S09E03.1080p.rus.LostFilm.TV.mkv", FolderType.Shows, "The Flash/Season 09/Flash.S09E03.1080p.rus.LostFilm.TV.mkv");
 
-        yield return new GuesserTestCaseData("Flash to The Flash folder with multiple seasons", "/Shows", (FolderType.Shows, "/Shows"))
+        yield return new GuesserTestCaseData("Flash to The Flash folder with multiple seasons", "/Downloads", (FolderType.Shows, "/Shows"))
             .AddSource("Flash.S08E01.1080p.rus.LostFilm.TV.mkv", 1)
             .AddSource("Flash.S08E02.1080p.rus.LostFilm.TV.mkv", 2)
             .AddSource("Flash.S08E03.1080p.rus.LostFilm.TV.mkv", 3)
