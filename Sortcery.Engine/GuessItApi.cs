@@ -7,18 +7,18 @@ namespace Sortcery.Engine;
 
 public class GuessItApi : IGuessItApi
 {
-    private static readonly JsonSerializerOptions Options = new JsonSerializerOptions
+    private static readonly JsonSerializerOptions Options = new()
     {
         PropertyNamingPolicy = SnakeCaseJsonNamingPolicy.Instance
     };
-    
+
     private readonly HttpClient _httpClient;
 
     public GuessItApi(HttpClient httpClient)
     {
         _httpClient = httpClient;
     }
-    
+
     public async Task<Guess> GuessAsync(string filename)
     {
         var query = QueryHelpers.AddQueryString("", "filename", filename);
