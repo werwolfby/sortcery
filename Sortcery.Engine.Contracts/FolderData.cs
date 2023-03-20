@@ -140,6 +140,15 @@ public class FolderData
             yield return file;
     }
 
+    public void ClearProperties() => _properties.Clear();
+
+    public void ClearPropertiesRecursively()
+    {
+        ClearProperties();
+        foreach (var folder in Folders)
+            folder.ClearPropertiesRecursively();
+    }
+
     public void AddProperty<T>(string property, T value)
     {
         if (!_properties.TryGetValue(property, out var hash))

@@ -37,6 +37,14 @@ builder.Services.AddHttpClient<IGuessItApi, GuessItApi>((sp, client) =>
     var options = sp.GetService<IOptions<GuessItOptions>>();
     client.BaseAddress = new Uri(options!.Value.Url);
 });
+
+builder.Services.AddSingleton<IPropertyAnalyzer, ShowsFolderParserPropertyAnalyzer>();
+
+builder.Services.AddSingleton<IGuesser, ShowsGuesser>();
+builder.Services.AddSingleton<IGuesser, LevinshteinGuesser>();
+builder.Services.AddSingleton<IGuesser, GuessItGuesser>();
+builder.Services.AddSingleton<ISmartGuesser, CompositeGuesser>();
+
 builder.Services.AddSingleton<ILinker, Linker>();
 
 var app = builder.Build();

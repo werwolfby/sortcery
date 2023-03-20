@@ -5,12 +5,14 @@ namespace Sortcery.Engine;
 public class Linker : ILinker
 {
     private readonly IFoldersProvider _foldersProvider;
-    private readonly IGuessItApi _guessItApi;
+    private readonly IPropertyAnalyzer _propertyAnalyzer;
+    private readonly ISmartGuesser _guesser;
 
-    public Linker(IFoldersProvider foldersProvider, IGuessItApi guessItApi)
+    public Linker(IFoldersProvider foldersProvider, IPropertyAnalyzer propertyAnalyzer, ISmartGuesser guesser)
     {
         _foldersProvider = foldersProvider;
-        _guessItApi = guessItApi;
+        _propertyAnalyzer = propertyAnalyzer;
+        _guesser = guesser;
 
         Links = Array.Empty<HardLinkData>();
     }
@@ -66,13 +68,10 @@ public class Linker : ILinker
 
     public async Task<FileData> GuessAsync(FileData fileData)
     {
-        var guess = await _guessItApi.GuessAsync(fileData.Name);
-        return guess.Type switch
-        {
-            "movie" => GuessMovie(guess, fileData.Name),
-            "episode" => GuessEpisode(guess, fileData.Name),
-            _ => throw new NotSupportedException($"Unknown guess type: {guess.Type}")
-        };
+        _foldersProvider.Source.ClearPropertiesRecursively();
+        _propertyAnalyzer.Analyze(Links);
+        var result = await _guesser.GuessAsync(fileData, Links);
+        return result!;
     }
 
     public bool Link(FileData sourceFile, FileData destinationFile)
@@ -80,32 +79,5 @@ public class Linker : ILinker
         if (!sourceFile.Link(destinationFile)) return false;
         destinationFile.Dir.AddFile(destinationFile);
         return true;
-    }
-
-    private FileData GuessMovie(Guess guess, string filename)
-    {
-        if (!_foldersProvider.TryGetDestinationFolder(FolderType.Movies, out var destinationFolder))
-        {
-            throw new InvalidOperationException("Unknown destination folder: Movies");
-        }
-
-        return new FileData(destinationFolder, HardLinkId.Empty, filename);
-    }
-
-    private FileData GuessEpisode(Guess guess, string filename)
-    {
-        if (!_foldersProvider.TryGetDestinationFolder(FolderType.Shows, out var destinationFolder))
-        {
-            throw new InvalidOperationException("Unknown destination folder: Series");
-        }
-
-        // Create temporary/virtual folder structure if it doesn't exist
-        var showFolder = destinationFolder.GetFolder(guess.Title)
-                         ?? new FolderData(Path.Join(destinationFolder.FullName, guess.Title), destinationFolder);
-        var seasonFolderName = $"Season {guess.Season}";
-        var seasonFolder = showFolder.GetFolder(seasonFolderName)
-                           ?? new FolderData(Path.Join(showFolder.FullName, seasonFolderName), showFolder);;
-
-        return new FileData(seasonFolder, HardLinkId.Empty, filename);
     }
 }
