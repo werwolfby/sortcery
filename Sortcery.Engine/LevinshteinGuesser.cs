@@ -21,7 +21,7 @@ public class SimilarityRatios
     public void Add(SimilarityRatio ratio) => _rations.Add(ratio);
 }
 
-public class LevinshteinGuesser
+public class LevinshteinGuesser : IGuesser
 {
     private readonly IFoldersProvider _foldersProvider;
 
@@ -32,10 +32,10 @@ public class LevinshteinGuesser
 
     public float SimilarityRatioThreshold { get; set; } = 0.8f;
 
-    public FileData? Guess(FileData source, IReadOnlyList<HardLinkData> links)
+    public ValueTask<FileData?> GuessAsync(FileData source, IReadOnlyList<HardLinkData> links)
     {
         // It makes sense only for root files
-        if (source.Dir != _foldersProvider.Source) return null;
+        if (source.Dir != _foldersProvider.Source) return ValueTask.FromResult<FileData?>(null);
 
         var similarities =  new Dictionary<SimilarityRatio, List<HardLinkData>>();
 
@@ -52,7 +52,7 @@ public class LevinshteinGuesser
             similarities.Add(similarityRatio, link);
         }
 
-        if (similarities.Count <= 0) return null;
+        if (similarities.Count <= 0) return ValueTask.FromResult<FileData?>(null);
 
         var destinations = new Dictionary<FolderData, SimilarityRatios>();
 
@@ -69,7 +69,7 @@ public class LevinshteinGuesser
 
         var maxSimilarity = destinations.MaxBy(x => x.Value.Average);
 
-        return new FileData(maxSimilarity.Key, HardLinkId.Empty, source.Name);
+        return ValueTask.FromResult<FileData?>(new FileData(maxSimilarity.Key, HardLinkId.Empty, source.Name));
     }
 
     private SimilarityRatio GetSimilarityRatio(string sourceName, string targetName)

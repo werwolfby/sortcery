@@ -2,7 +2,7 @@
 
 namespace Sortcery.Engine;
 
-public class ShowsGuesser
+public class ShowsGuesser : IGuesser
 {
     private readonly IFoldersProvider _foldersProvider;
 
@@ -11,16 +11,16 @@ public class ShowsGuesser
         _foldersProvider = foldersProvider;
     }
 
-    public FileData? Guess(FileData source)
+    public ValueTask<FileData?> GuessAsync(FileData source, IReadOnlyList<HardLinkData> links)
     {
-        if (source.Dir.Root != _foldersProvider.Source) return null;
+        if (source.Dir.Root != _foldersProvider.Source) return ValueTask.FromResult<FileData?>(null);
 
         var shows = source.Dir.GetPropertyValues<string>("ShowFolder");
-        if (shows.Count != 1) return null;
+        if (shows.Count != 1) return ValueTask.FromResult<FileData?>(null);
 
         // Season folder is optional, but if it exists, it should be only one
         var seasons = source.Dir.GetPropertyValues<string>("SeasonFolder");
-        if (seasons.Count > 1) return null;
+        if (seasons.Count > 1) return ValueTask.FromResult<FileData?>(null);
 
         var show = shows.First();
         var season = seasons.FirstOrDefault();
@@ -38,6 +38,6 @@ public class ShowsGuesser
             destinationFileFolder = showFolder.GetFolder(season) ?? throw new InvalidOperationException("Season folder not found");
         }
 
-        return new FileData(destinationFileFolder, HardLinkId.Empty, source.Name);
+        return ValueTask.FromResult<FileData?>(new FileData(destinationFileFolder, HardLinkId.Empty, source.Name));
     }
 }

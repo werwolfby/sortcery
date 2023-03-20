@@ -2,7 +2,7 @@
 
 namespace Sortcery.Engine;
 
-public class GuessItGuesser
+public class GuessItGuesser : IGuesser
 {
     private readonly IGuessItApi _guessItApi;
     private readonly IFoldersProvider _foldersProvider;

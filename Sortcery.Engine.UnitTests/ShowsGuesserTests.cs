@@ -6,10 +6,10 @@ namespace Sortcery.Engine.UnitTests;
 public class ShowsGuesserTests
 {
     [TestCaseSource(nameof(GetTestCases))]
-    public void ShowsGuesser_Guess(IFoldersProvider foldersProvider, FileData sourceFile, FileData? destinationFile)
+    public async Task ShowsGuesser_Guess(IFoldersProvider foldersProvider, FileData sourceFile, FileData? destinationFile)
     {
         var guesser = new ShowsGuesser(foldersProvider);
-        var result = guesser.Guess(sourceFile);
+        var result = await guesser.GuessAsync(sourceFile, Array.Empty<HardLinkData>());
 
         Assert.That(result, Is.Not.Null);
         Assert.That(result!.Dir, Is.EqualTo(destinationFile.Dir));

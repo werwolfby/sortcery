@@ -6,10 +6,10 @@ namespace Sortcery.Engine.UnitTests;
 public class LevinshteinGuesserTests
 {
     [TestCaseSource(nameof(GetTestCases))]
-    public void LevinshteinGuesser_Guess(IFoldersProvider foldersProvider, IReadOnlyList<HardLinkData> hardlinks, FileData sourceFile, FileData? destinationFile)
+    public async Task LevinshteinGuesser_Guess(IFoldersProvider foldersProvider, IReadOnlyList<HardLinkData> hardlinks, FileData sourceFile, FileData? destinationFile)
     {
         var guesser = new LevinshteinGuesser(foldersProvider);
-        var result = guesser.Guess(sourceFile, hardlinks);
+        var result = await guesser.GuessAsync(sourceFile, hardlinks);
 
         if (destinationFile == null)
         {
