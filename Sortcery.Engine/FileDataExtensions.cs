@@ -14,7 +14,10 @@ internal static class FileDataExtensions
         var sourcePath = file.FullName;
         var targetPath = target.FullName;
         var targetFileInfo = new SortceryFileInfo(targetPath);
-        targetFileInfo.Directory!.Create();
+        if (!targetFileInfo.Directory!.Exists)
+        {
+            targetFileInfo.Directory!.Create();
+        }
         #if _WINDOWS
         return WinApi.CreateHardLink(targetPath, sourcePath);
         #else
@@ -22,8 +25,9 @@ internal static class FileDataExtensions
         try
         {
             sourceFileInfo.CreateLink(targetPath);
+            return true;
         }
-        catch (CreateExceptionForLastError e)
+        catch (Exception e)
         {
             return false;
         }
