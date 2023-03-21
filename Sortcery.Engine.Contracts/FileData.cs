@@ -2,36 +2,24 @@
 
 public class FileData
 {
-    public FileData(FolderData dir, string relativeName)
+    public FileData(FolderData dir, HardLinkId hardLinkId, string name)
     {
         Dir = dir;
-        RelativeName = relativeName;
-        Path = System.IO.Path.GetDirectoryName(relativeName)!;
-        Name = System.IO.Path.GetFileName(relativeName);
-    }
-
-    public FileData(FolderData dir, string path, string name)
-    {
-        Dir = dir;
-        RelativeName = System.IO.Path.Join(path, name);
-        Path = path;
+        HardLinkId = hardLinkId;
         Name = name;
     }
 
     public FolderData Dir { get; }
 
-    public string Path { get; }
+    public HardLinkId HardLinkId { get; set; }
 
     public string Name { get; }
 
-    public string RelativeName { get; }
+    public string FullName => Path.Join(Dir.FullName, Name);
 
-    public string FullName => System.IO.Path.Join(Dir.FullName, RelativeName);
-
-    public void Deconstruct(out FolderData dir, out string path, out string name)
+    public void Deconstruct(out FolderData dir, out string name)
     {
         dir = Dir;
-        path = Path;
         name = Name;
     }
 }

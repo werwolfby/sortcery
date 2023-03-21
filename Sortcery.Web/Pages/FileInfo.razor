@@ -16,6 +16,12 @@ else
 
     public string? RelativePath =>
         !string.IsNullOrEmpty(File?.Path)
-            ? File?.Path + FoldersService.DirectorySeparator + File?.Name
+            ? TrimEndDirectorySeparator(File.Path) + FoldersService.DirectorySeparator + File.Name
             : File?.Name;
+
+    private string TrimEndDirectorySeparator(string path) =>
+        path.EndsWith(FoldersService.DirectorySeparator)
+            ? path[..^FoldersService.DirectorySeparator.Length]
+            : path;
+
 }

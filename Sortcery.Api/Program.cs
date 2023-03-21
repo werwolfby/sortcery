@@ -20,13 +20,16 @@ builder.Services
     .Bind(builder.Configuration.GetSection(FoldersOptions.Folders))
     .Validate(o => o.IsValid, "Folders options are not valid")
     .ValidateOnStart();
+builder.Services.AddSingleton<ITraverser, Traverser>();
 builder.Services.AddSingleton<IFoldersProvider, FoldersProvider>(sp =>
 {
-    var options = sp.GetService<IOptions<FoldersOptions>>();
+    var options = sp.GetRequiredService<IOptions<FoldersOptions>>();
+    var traverser = sp.GetRequiredService<ITraverser>();
     return new FoldersProvider(
-        new FolderData(FolderType.Source, options!.Value.Source),
-        new FolderData(FolderType.Movies, options!.Value.Movies),
-        new FolderData(FolderType.Shows, options!.Value.Series));
+        traverser,
+        options.Value.Source,
+        (FolderType.Movies, options.Value.Movies),
+        (FolderType.Shows, options.Value.Series));
 });
 builder.Services.AddSingleton<IGuessItApi, GuessItApi>();
 builder.Services.AddHttpClient<IGuessItApi, GuessItApi>((sp, client) =>
@@ -34,6 +37,14 @@ builder.Services.AddHttpClient<IGuessItApi, GuessItApi>((sp, client) =>
     var options = sp.GetService<IOptions<GuessItOptions>>();
     client.BaseAddress = new Uri(options!.Value.Url);
 });
+
+builder.Services.AddSingleton<IPropertyAnalyzer, ShowsFolderParserPropertyAnalyzer>();
+
+builder.Services.AddSingleton<IGuesser, ShowsGuesser>();
+builder.Services.AddSingleton<IGuesser, LevinshteinGuesser>();
+builder.Services.AddSingleton<IGuesser, GuessItGuesser>();
+builder.Services.AddSingleton<ISmartGuesser, CompositeGuesser>();
+
 builder.Services.AddSingleton<ILinker, Linker>();
 
 var app = builder.Build();
@@ -48,6 +59,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
+app.UseWebAssemblyDebugging();
 app.UseStaticFiles();
 
 app.UseAuthorization();

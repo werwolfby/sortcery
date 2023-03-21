@@ -5,12 +5,15 @@ namespace Sortcery.Engine;
 public class Linker : ILinker
 {
     private readonly IFoldersProvider _foldersProvider;
-    private readonly IGuessItApi _guessItApi;
+    private readonly IPropertyAnalyzer _propertyAnalyzer;
+    private readonly ISmartGuesser _guesser;
 
-    public Linker(IFoldersProvider foldersProvider, IGuessItApi guessItApi)
+    public Linker(IFoldersProvider foldersProvider, IPropertyAnalyzer propertyAnalyzer, ISmartGuesser guesser)
     {
         _foldersProvider = foldersProvider;
-        _guessItApi = guessItApi;
+        _propertyAnalyzer = propertyAnalyzer;
+        _guesser = guesser;
+
         Links = Array.Empty<HardLinkData>();
     }
 
@@ -18,94 +21,63 @@ public class Linker : ILinker
 
     public void Update()
     {
-        var sourceFiles = _foldersProvider.Source.Traverse();
-        var destinationFolderFiles = _foldersProvider.DestinationFolders
-            .Select(x => (Folder: x, Files: x.Traverse()))
+        _foldersProvider.Update();
+
+        var destinationFolderFiles = _foldersProvider.DestinationFolders.Values
+            .Select(x => x.GetAllFilesRecursively().ToDictionaryAggregated(x => x.HardLinkId))
             .ToList();
 
-        Links = FindLinks(sourceFiles, destinationFolderFiles);
-    }
-
-    public async Task<FileData> GuessAsync(FileData fileData)
-    {
-        var guess = await _guessItApi.GuessAsync(fileData.Name);
-        return guess.Type switch
-        {
-            "movie" => GuessMovie(guess, fileData.Name),
-            "episode" => GuessEpisode(guess, fileData.Name),
-            _ => throw new NotSupportedException($"Unknown guess type: {guess.Type}")
-        };
-    }
-
-    public void Link(FileData sourceFile, FileData destinationFile) => sourceFile.Link(destinationFile);
-
-    internal IReadOnlyList<HardLinkData> FindLinks(
-        IReadOnlyDictionary<HardLinkId, FileData> sourceFiles,
-        IReadOnlyList<(FolderData Folder, IReadOnlyDictionary<HardLinkId, FileData> Files)> destinationFolderFiles)
-    {
         var maxCapacity = Math.Max(
-            sourceFiles.Count,
-            destinationFolderFiles.Sum(d => d.Files.Count));
-        var result = new Dictionary<HardLinkId,(FileData? Source, List<FileData>? Targets)>(maxCapacity);
+            _foldersProvider.Source.GetAllFilesCount(),
+            destinationFolderFiles.Sum(d => d.Count));
+        var result = new List<(FileData? Source, List<FileData>? Targets)>(maxCapacity);
 
         // Find all hardlinks in the source folder
-        foreach (var (hardLinkId, fileData) in sourceFiles)
+        var existingHardLinks = new HashSet<HardLinkId>();
+        foreach (var fileData in _foldersProvider.Source.GetAllFilesRecursively())
         {
-            var exists = false;
-            foreach (var (_, destinationFiles) in destinationFolderFiles)
+            var hardLinkId = fileData.HardLinkId;
+            List<FileData>? targets = null;
+            foreach (var destinationFiles in destinationFolderFiles)
             {
-                if (!destinationFiles.TryGetValue(hardLinkId, out var destinationFileData)) continue;
-
-                if (!result.TryGetValue(hardLinkId, out var hardLinkData))
+                if (destinationFiles.TryGetValue(hardLinkId, out var destinationFileDataList))
                 {
-                    hardLinkData = (fileData, new List<FileData>());
-                    result.Add(hardLinkId, hardLinkData);
+                    targets ??= new List<FileData>();
+                    targets.AddRange(destinationFileDataList);
+                    existingHardLinks.Add(hardLinkId);
                 }
-                hardLinkData.Targets!.Add(destinationFileData);
-                exists = true;
             }
-            if (!exists)
-            {
-                result.Add(hardLinkId, (fileData, null));
-            }
+            result.Add((fileData, targets));
         }
 
         // Find all hardlinks that exists only in at any destination folder but not in the source folder
-        foreach (var (_, destinationFiles) in destinationFolderFiles)
+        foreach (var destinationFiles in destinationFolderFiles)
         {
-            foreach (var (hardLinkId, fileData) in destinationFiles)
+            foreach (var (hardLinkId, fileDataList) in destinationFiles)
             {
-                if (result.ContainsKey(hardLinkId)) continue;
-                result.Add(hardLinkId, (null, new List<FileData> {fileData}));
+                if (existingHardLinks.Contains(hardLinkId)) continue;
+                result.Add((null, fileDataList));
             }
         }
 
-        return result
-            .Select(x =>
-                new HardLinkData(x.Value.Source,
-                    x.Value.Targets
-                    ?? (IReadOnlyList<FileData>)Array.Empty<FileData>()))
+        Links = result
+            .Select(x => new HardLinkData(x.Source, x.Targets?.AsReadOnly() ?? (IReadOnlyList<FileData>)Array.Empty<FileData>()))
             .ToList()
             .AsReadOnly();
     }
 
-    private FileData GuessMovie(Guess guess, string filename)
+    public async Task<FileData> GuessAsync(FileData fileData)
     {
-        if (!_foldersProvider.TryGetDestinationFolder(FolderType.Movies, out var destinationFolder))
-        {
-            throw new InvalidOperationException("Unknown destination folder: Movies");
-        }
-
-        return new FileData(destinationFolder, filename);
+        _foldersProvider.Source.ClearPropertiesRecursively();
+        _propertyAnalyzer.Analyze(Links);
+        var result = await _guesser.GuessAsync(fileData, Links);
+        return result!;
     }
 
-    private FileData GuessEpisode(Guess guess, string filename)
+    public bool Link(FileData sourceFile, FileData destinationFile)
     {
-        if (!_foldersProvider.TryGetDestinationFolder(FolderType.Shows, out var destinationFolder))
-        {
-            throw new InvalidOperationException("Unknown destination folder: Series");
-        }
-
-        return new FileData(destinationFolder, Path.Combine(guess.Title, $"Season {guess.Season}", filename));
+        if (!sourceFile.Link(destinationFile)) return false;
+        destinationFile.Dir.AddFile(destinationFile);
+        return true;
     }
 }

@@ -8,8 +8,8 @@ public static class HardLinkDataMapper
     {
         return new()
         {
-            Source = hardLinkData.Source?.ToFileData(),
-            Targets = hardLinkData.Targets.Select(x => x.ToFileData()).ToList()
+            Source = hardLinkData.Source?.ToApi(),
+            Targets = hardLinkData.Targets.Select(x => x.ToApi()).ToList()
         };
     }
 

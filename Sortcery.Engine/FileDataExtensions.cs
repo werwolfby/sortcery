@@ -9,17 +9,24 @@ namespace Sortcery.Engine;
 
 internal static class FileDataExtensions
 {
-    internal static void Link(this FileData file, FileData target)
+    internal static bool Link(this FileData file, FileData target)
     {
         var sourcePath = file.FullName;
         var targetPath = target.FullName;
         var targetFileInfo = new SortceryFileInfo(targetPath);
         targetFileInfo.Directory!.Create();
         #if _WINDOWS
-        WinApi.CreateHardLink(targetPath, sourcePath);
+        return WinApi.CreateHardLink(targetPath, sourcePath);
         #else
         var sourceFileInfo = new SortceryFileInfo(sourcePath);
-        sourceFileInfo.CreateLink(targetPath);
+        try
+        {
+            sourceFileInfo.CreateLink(targetPath);
+        }
+        catch (CreateExceptionForLastError e)
+        {
+            return false;
+        }
         #endif
     }
 }

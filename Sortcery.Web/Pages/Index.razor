@@ -2,7 +2,9 @@
 @using Sortcery.Api.Contracts.Models
 @using Sortcery.Web.Models
 @using System.IO
+@using Sortcery.Web.Services.Contracts
 @inject HttpClient Http
+@inject IFoldersService FoldersService
 
 <div class="container-fluid pt-3">
     <div class="form-check">
@@ -68,20 +70,35 @@ else
 }
 
 @code {
+
+    private bool _showOnlyNewFiles = true;
+
     private HardLinkViewModel[]? AllLinks { get; set; }
 
     private HardLinkViewModel[]? NewLinks { get; set; }
 
     private HardLinkViewModel[]? Links => ShowOnlyNewFiles ? NewLinks : AllLinks;
 
-    public bool ShowOnlyNewFiles { get; set; } = true;
+    public bool ShowOnlyNewFiles
+    {
+        get => _showOnlyNewFiles;
+        set
+        {
+            _showOnlyNewFiles = value;
+            if (value)
+            {
+                NewLinks = AllLinks?.Where(e => e.Targets.Count == 0).ToArray();
+            }
+        }
+    }
 
     private async Task GuessIt(HardLinkViewModel link)
     {
         link.Guessing = true;
         try
         {
-            var query = Path.Join("api/guess", link.Source!.FullName);
+            var relativeName = link.Source!.RelativeName.Replace(FoldersService.DirectorySeparator, "/");
+            var query = Path.Join("api/guess", link.Source!.Dir, relativeName);
             link.Guess = await Http.GetFromJsonAsync<FileData>(query);
         }
         finally
@@ -105,10 +122,12 @@ else
         link.Linking = true;
         try
         {
-            var query = Path.Join("api/links", link.Source!.FullName);
+            var relativeName = link.Source!.RelativeName.Replace(FoldersService.DirectorySeparator, "/");
+            var query = Path.Join("api/links", link.Source!.Dir, relativeName);
             using var linkResponse = await Http.PostAsJsonAsync(query, link.Guess!);
             linkResponse.EnsureSuccessStatusCode();
-            link.Targets.Add(link.Guess!);
+            var result = await linkResponse.Content.ReadFromJsonAsync<FileData>();
+            link.Targets.Add(result!);
             link.Guess = null;
         }
         finally

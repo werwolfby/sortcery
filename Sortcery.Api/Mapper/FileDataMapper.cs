@@ -4,12 +4,12 @@ namespace Sortcery.Api.Mapper;
 
 public static class FileDataMapper
 {
-    public static Contracts.Models.FileData ToFileData(this FileData fileData)
+    public static Contracts.Models.FileData ToApi(this FileData fileData)
     {
         return new()
         {
-            Dir = fileData.Dir.Name,
-            Path = fileData.Path,
+            Dir = fileData.Dir.Root.Name,
+            Path = fileData.Dir.RelativePath,
             Name = fileData.Name
         };
     }
