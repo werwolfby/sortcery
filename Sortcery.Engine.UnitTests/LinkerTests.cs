@@ -68,7 +68,7 @@ public class Tests
         foldersProvider.Setup(x => x.Source).Returns(sourceDir).Verifiable();
         foldersProvider.Setup(x => x.DestinationFolders).Returns(destinationFolders);
 
-        var linker = new Linker(foldersProvider.Object, null);
+        var linker = new Linker(foldersProvider.Object, null, null);
 
         // Act
         linker.Update();
